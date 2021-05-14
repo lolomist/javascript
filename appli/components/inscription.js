@@ -15,15 +15,17 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      name: '',
-      firstname: '',
+      username: '',
       password: '',
       email: '',
-      adress: '',
-      zip: '',
       alertMessage: '',
       condition: true,
-      public_key: "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAty7dthgTucfmmVimVQQ1\n1bqgrsk6aqUMVUL2vAylH4NFe6hHBn4rysBpUH8jfu6OG9DTvakrDAUt7YhJBkUp\nJ3N3MqGqviJ10AHGt/jvC/7PmqIcWz36hbaUf7knksZG3X5TsKgIR8kLIZzFHv/z\nhNV17/Y/yP1yaNPmnf6mnswc6eVJ9VGKjbLHXtWth6Z2j0drs5Jc4k3bxtBjoxZc\ngcjsqaeawyihaITQG2/zbmH691nuZq3kfGrOoESr7DhRdK4YzBLa3DdsGQWZapbu\nzhNsvSzCoZR1vaFOFNKjXgJN+MzGsQZTlkBEw7vyJQlw3SQVVHyPEVUWPggNd3Kg\n4QIDAQAB\n-----END PUBLIC KEY-----"
+      usernameError: false,
+      usernameErrorMessage: 'test',
+      emailError: false,
+      emailErrorMessage: '',
+      passwordError: false,
+      passwordErrorMessage: ''
     }
     this.validateInscription = this.validateInscription.bind(this);
     this.moveConnection = this.moveConnection.bind(this);
@@ -42,21 +44,44 @@ class App extends Component {
     console.log(this.state.condition);
     if (this.state.condition == true) {
 
-    // test de connection
-    NetInfo.fetch().then(state => {
-      if (!state.isConnected) {
-        alert("No connection detected, please check your connection");
-      } else {
-        let re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+      // test de connection
+      NetInfo.fetch().then(state => {
+        if (!state.isConnected) {
+          alert("No connection detected, please check your connection");
+        } else {
+          this.state.usernameError = false;
+          this.state.emailError = false;
+          this.state.passwordError = false;
+          let re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
-        if (!re.test(this.state.email)) {
-          alert("Please enter a valid email address");
-          return ("Invalid email address");
-        }
+          // error management
+          if (this.state.username.includes("@")) {
+            alert("Please enter a valid username");
+            this.state.usernameError = true;
+            this.state.usernameErrorMessage = "Enter a valid username without '@'";
+            this.setState({ state: this.state });
+            return ("Invalid username");
+          }
+          if (!re.test(this.state.email)) {
+            alert("Please enter a valid email address");
+            this.state.emailError = true;
+            this.state.emailErrorMessage = "Enter a valid email address";
+            this.setState({ state: this.state });
+            return ("Invalid email address");
+          }
+          if (this.state.password.length < 6 || !/\d/.test(this.state.password)) {
+            alert("Your password must contain at least 6 characters and at least 1 number");
+            this.state.passwordError = true;
+            this.state.passwordErrorMessage = "Enter a valid password";
+            this.setState({ state: this.state });
+            return ("Invalid password");
+          }
 
-        // RegisterEmmit(this.state.name, this.state.firstname, this.state.email, this.state.password);
-        GLOBALS.SOCKET.emit('register', { name: this.state.name, firstname: this.state.firstname, email: this.state.email, password: this.state.password });
-        GLOBALS.SOCKET.on('register', data => {
+          this.setState({ state: this.state });
+
+          // RegisterEmmit(this.state.name, this.state.firstname, this.state.email, this.state.password);
+          GLOBALS.SOCKET.emit('register', { username: this.state.username, email: this.state.email, password: this.state.password });
+          GLOBALS.SOCKET.on('register', data => {
             console.log("data: " + data.status + " / " + data.message);
             if (data.status === "ok") {
                 alert("Inscription réussie !")
@@ -64,9 +89,9 @@ class App extends Component {
               }
               else
                 alert(data.message)
-        });    
-      }
-    });
+          });    
+        }
+      });
     } else {
       alert("accepter les conditions utilisations");
     }
@@ -79,51 +104,85 @@ class App extends Component {
           <View style={blockacceuil.logo}>
             <Text style={blockacceuil.textLogo}>+</Text>
           </View>
-            <Text style={blockacceuil.textBlock}>Créer son compte</Text>
+            <Text style={blockacceuil.textBlock}>Create an account</Text>
         </View>
 
         <View style={blockacceuil.block3}>
           <View style={blockacceuil.formulaire}>
-            <TextInput
-                label='Nom'
-                placeholderTextColor="black"
-                placeholder="Entrez votre Nom"
-                style={popup.textinput}
-                value={this.state.name}
-                onChangeText={name => this.setState({ name })}
-            />
+            {!this.state.usernameError && (
+              <TextInput
+                  label='Username'
+                  placeholderTextColor="black"
+                  placeholder="Enter your username"
+                  style={popup.textinput}
+                  value={this.state.username}
+                  onChangeText={username => this.setState({ username })}
+              /> 
+            )}
+            {this.state.usernameError && (
+              <TextInput
+                  label='Username'
+                  placeholderTextColor="black"
+                  placeholder="Enter your username"
+                  style={popup.textinputRed}
+                  value={this.state.username}
+                  onChangeText={username => this.setState({ username })}
+              /> 
+            )}
+            {this.state.usernameError && (
+              <Text style={{fontSize: 13, fontWeight: '500', color: "red", textAlign: 'right', marginRight: 50}}>{this.state.usernameErrorMessage}</Text>
+            )}
+
+            {!this.state.emailError && (
+              <TextInput
+                  label='E-mail'
+                  placeholderTextColor="black"
+                  placeholder="Enter your E-mail"
+                  style={popup.textinput}
+                  value={this.state.email}
+                  onChangeText={email => this.setState({ email })}
+              />
+            )}
+            {this.state.emailError && (
+              <TextInput
+                  label='E-mail'
+                  placeholderTextColor="black"
+                  placeholder="Enter your E-mail"
+                  style={popup.textinputRed}
+                  value={this.state.email}
+                  onChangeText={email => this.setState({ email })}
+              /> 
+            )}
+            {this.state.emailError && (
+              <Text style={{fontSize: 13, fontWeight: '500', color: "red", textAlign: 'right', marginRight: 50}}>{this.state.emailErrorMessage}</Text>
+            )}
+
             
-            <TextInput
-                label='Prénom'
-                placeholderTextColor="black"
-                placeholder="Entrez votre Prénom"
-                style={popup.textinput}
-                value={this.state.firstname}
-                onChangeText={firstname => this.setState({ firstname })}
-            />
-
-            <TextInput
-                label='Mot de passe'
-                placeholderTextColor="black"
-                placeholder="Entrez votre Mot de passe"
-                style={popup.textinput}
-                value={this.state.password}
-                onChangeText={password => this.setState({ password })}
-                secureTextEntry={true}
-            />
-
-            <TextInput
-                label='E-mail'
-                placeholderTextColor="black"
-                placeholder="Entrez votre E-mail"
-                style={popup.textinput}
-                value={this.state.email}
-                onChangeText={email => this.setState({ email })}
-            />
-          
-            <View style={{ flexDirection: "row", height: "5%", alignItems: "center", justifyContent: "space-between" }}>
-                <Text>Condition Utilisation</Text>
-            </View>
+            {!this.state.passwordError && (
+              <TextInput
+                  label='Password'
+                  placeholderTextColor="black"
+                  placeholder="Enter your password"
+                  style={popup.textinput}
+                  value={this.state.password}
+                  onChangeText={password => this.setState({ password })}
+                  secureTextEntry={true}
+              />
+            )}
+            {this.state.passwordError && (
+              <TextInput
+                  label='Password'
+                  placeholderTextColor="black"
+                  placeholder="Enter your password"
+                  style={popup.textinputRed}
+                  value={this.state.password}
+                  onChangeText={password => this.setState({ password })}
+                  secureTextEntry={true}
+              />
+            )}
+            {this.state.passwordError && (
+              <Text style={{fontSize: 13, fontWeight: '500', color: "red", textAlign: 'right', marginRight: 50}}>{this.state.passwordErrorMessage}</Text>
+            )}
           </View>
         </View>
 
@@ -131,7 +190,7 @@ class App extends Component {
           <View style={blockacceuil.logoConnection}>
             <Text style={blockacceuil.textLogoConnection}>+</Text>
           </View>
-            <Text style={blockacceuil.textConnection}>Créer un compte</Text>
+            <Text style={blockacceuil.textConnection}>Create account</Text>
 
         </TouchableOpacity>
       </View>

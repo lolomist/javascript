@@ -82,6 +82,16 @@ import { StyleSheet } from 'react-native'
     width: "100%", 
     height: 30
   },
+  textinputRed: {
+    borderBottomWidth: 1,
+    borderTopWidth: 1,
+    borderRightWidth: 1,
+    borderLeftWidth: 1,
+    borderRadius: 5,
+    borderColor: 'red',
+    width: "100%", 
+    height: 30
+  },
   textinput2: {
     borderBottomWidth: 1,
     borderRadius: 5,

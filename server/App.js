@@ -44,26 +44,20 @@ io.on('connection', socket => {
 
 
   socket.on("register", (body) => {
-    const { name, firstname, email, password } = body;
+    const { username, email, password } = body;
 
-    if (!name || !firstname || !email || !password) {
+    if (!username || !email || !password) {
       socket.emit( 'register', {status: "error", message: "Merci de remplir toutes les cases."} );
-      return;
-    }
-    if (password.length < 6) {
-      socket.emit( 'register', {status: "error", message: "Les mdp doivent faire 6 charactères minimum."} );
       return;
     }
 
     const user = {
-        name,
-        firstname,
+        username,
         email,
         password
     }
 
     console.log("Client registers");
-    console.log("1-User password: " + password)
 
     socket.emit( 'register', {status: "ok", message: userModule.register(user)} );
   });

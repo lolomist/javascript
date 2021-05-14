@@ -8,8 +8,7 @@ const UserSchema = new Schema({
         required: true
     },
     password: {type: String},
-    name: {type: String},
-    firstname: {type: String},
+    username: {type: String},
     date: {
         type: Date,
         default: Date.now

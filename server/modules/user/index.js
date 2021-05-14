@@ -33,6 +33,20 @@ const _validateEmailUnique = (email) => {
     })
 }
 
+const _validateUsernameUnique = (username) => {
+    return new Promise((resolve, reject) => {
+        User.findOne({ username: username })
+            .then(user => {
+                if (user === null)
+                    resolve();
+                reject(new Error('Username already in use'))
+            })
+            .catch(err => {
+                reject(err)
+            })
+    })
+}
+
 const _matchUserCreds = (email, password) => {
     const errorMessage = 'Credentials do not match.';
     let user = null;
@@ -66,13 +80,12 @@ const registerMail = (id, email) => ({
 const userModule = {
     register: (userData) => {
         return new Promise((resolve, reject) => {
-            _validateEmailUnique(userData.email)
+            _validateEmailUnique(userData.email).then(_validateUsernameUnique(userData.username))
                 .then(() => {
                     const newUser = new User({
                         email: userData.email,
                         password: userData.password,
-                        name: userData.name,
-                        firstname: userData.firstname
+                        username: userData.username
                     })
                     console.log("2-User password: " + userData.password)
                     return newUser.save()
@@ -99,7 +112,7 @@ const userModule = {
 
         const password = crypto.randomBytes(6).toString('hex')
 
-        await User.updateOne({ _id: user._id }, { password: await hashPassword(password) })
+        //await User.updateOne({ _id: user._id }, { password: await hashPassword(password) })
 
         return emailModule.send({
             recipient: user.email,
