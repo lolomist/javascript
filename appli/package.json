@@ -1,0 +1,66 @@
+{
+  "main": "node_modules/expo/AppEntry.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "test": "node_modules/.bin/jest test/*//*.spec.js",
+    "eject": "expo eject"
+  },
+  "dependencies": {
+    "@react-native-community/async-storage": "~1.12.0",
+    "@react-native-community/masked-view": "0.1.10",
+    "@react-native-community/netinfo": "6.0.0",
+    "axios": "^0.20.0",
+    "enzyme-adapter-react-16": "^1.15.4",
+    "expo": "^41.0.0",
+    "expo-image-picker": "~10.1.4",
+    "expo-location": "~12.0.4",
+    "expo-permissions": "~12.0.1",
+    "jsencrypt": "^3.0.0-rc.1",
+    "react": "16.13.1",
+    "react-dom": "16.13.1",
+    "react-native": "https://github.com/expo/react-native/archive/sdk-41.0.0.tar.gz",
+    "react-native-axios": "^0.17.1",
+    "react-native-fetch-blob": "^0.10.8",
+    "react-native-fs": "^2.16.6",
+    "react-native-gesture-handler": "~1.10.2",
+    "react-native-image-picker": "^2.3.3",
+    "react-native-maps": "0.27.1",
+    "react-native-reanimated": "~2.1.0",
+    "react-native-safe-area-context": "3.2.0",
+    "react-native-screens": "~3.0.0",
+    "react-native-web": "~0.13.12",
+    "react-navigation": "^4.3.8",
+    "react-navigation-stack": "^2.3.13",
+    "react-test-renderer": "^16.13.1",
+    "socket.io-client": "^4.0.1"
+  },
+  "devDependencies": {
+    "@babel/core": "~7.9.0",
+    "babel-preset-expo": "8.3.0",
+    "jest-expo": "^41.0.0",
+    "enzyme": "^3.11.0",
+    "react-test-renderer": "^16.13.1",
+    "enzyme-adapter-react-16": "^1.15.2"
+  },
+  "jest": {
+    "projects": [
+      {
+        "preset": "jest-expo/ios"
+      },
+      {
+        "preset": "jest-expo/android"
+      }
+    ],
+    "transformIgnorePatterns": [
+      "node_modules/(?!(jest-)?react-native|react-clone-referenced-element|@react-native-community|expo(nent)?|@expo(nent)?/.|react-navigation|@react-navigation/.|@unimodules/.|unimodules|sentry-expo|native-base|@sentry/.)"
+    ],
+    "transform": {
+      "\\.js$": "<rootDir>/node_modules/babel-jest",
+      "^.+\\.jsx?$": "babel-jest"
+    }
+  },
+  "private": true
+}
