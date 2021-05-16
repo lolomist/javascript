@@ -5,6 +5,8 @@ import { createAppContainer } from 'react-navigation'
 import Accueil from './components/accueil'
 import Inscription from './components/inscription'
 import Connection from './components/connection'
+import Recover from './components/recover'
+import Reset from './components/reset'
 import GLOBALS from "./components/globals.js";
 import { Connect } from './components/socket';
 
@@ -14,6 +16,8 @@ const AppNavigator = createStackNavigator({
   Accueil: {screen: Accueil },
   Connection: {screen: Connection },
   Inscription: {screen: Inscription },
+  Recover: {screen: Recover },
+  Reset: {screen: Reset }
 },
 {
 initialRouteName: 'Accueil',

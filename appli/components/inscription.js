@@ -7,7 +7,6 @@ import {
 } from 'react-native';
 import { containers, blockacceuil, popup } from '../components/styles'
 import GLOBALS from "../components/globals.js";
-import { JSEncrypt } from 'jsencrypt';
 import NetInfo from '@react-native-community/netinfo';
 // import { RegisterEmmit, RegisterReceive } from './socket';
 
@@ -25,10 +24,14 @@ class App extends Component {
       emailError: false,
       emailErrorMessage: '',
       passwordError: false,
-      passwordErrorMessage: ''
+      passwordErrorMessage: '',
+      popupRecupMdp: false
     }
     this.validateInscription = this.validateInscription.bind(this);
     this.moveConnection = this.moveConnection.bind(this);
+    this.showPopupRecupMdp = this.showPopupRecupMdp.bind(this);
+    this.hidePopupRecupMdp = this.hidePopupRecupMdp.bind(this);
+    this.moveToRecover = this.moveToRecover.bind(this);
   }
 
   handleChange(event) {
@@ -86,15 +89,33 @@ class App extends Component {
             if (data.status === "ok") {
                 alert("Inscription réussie !")
                 this.moveConnection();
-              }
-              else
+            } else {
+              console.log(data.message)
+              if (data.message === "Email already in use.") {
+                this.state.emailError = true;
+                this.state.emailErrorMessage = "Enter a valid email address";
+                this.showPopupRecupMdp();
+              } else if (data.message === "Username already in use.") {
+                this.state.usernameError = true;
+                this.state.usernameErrorMessage = "This username is already taken";
+                this.setState({ state: this.state });
+              } else
                 alert(data.message)
-          });    
+            }
+          });   
         }
       });
-    } else {
-      alert("accepter les conditions utilisations");
     }
+  };
+
+  showPopupRecupMdp() {
+    this.setState({ popupRecupMdp: true });
+  };
+  hidePopupRecupMdp() {
+    this.setState({ popupRecupMdp: false });
+  };
+  moveToRecover() {
+    this.props.navigation.navigate("Recover");
   };
 
   render() {
@@ -193,11 +214,33 @@ class App extends Component {
             <Text style={blockacceuil.textConnection}>Create account</Text>
 
         </TouchableOpacity>
+
+        {this.state.popupRecupMdp && (
+          <View style={popup.popup}>
+            <View style={popup.popup2}>
+              <View style={containers.container}>
+                <Text style={{ fontSize: 25}}>An account with this email already exists. Do you want to recover your account?</Text>
+                <View style={{width:"100%",alignItems:"center", top: "50%"}}>
+                  <TouchableOpacity onPress={this.moveToRecover} style={blockacceuil.blockConnection2}>
+                    <View style={blockacceuil.logoConnection}>
+                      <Text style={blockacceuil.textLogoConnection2}>?</Text>
+                    </View>
+                      <Text style={blockacceuil.textConnection}>Account recovery</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={this.hidePopupRecupMdp} style={blockacceuil.blockRecup2}>
+                    <View style={blockacceuil.logoConnection}>
+                      <Text style={blockacceuil.textLogoConnection3}>x</Text>
+                    </View>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </View>
+        )}
       </View>
 
     )
   }
 }
-
 
 export default App;

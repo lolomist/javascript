@@ -7,9 +7,11 @@ const mongoose = require('mongoose');
 const passport = require('passport');
 const logger = require('morgan');
 const userModule = require('./modules/user/index');
+const emailModule = require('./modules/mail/index')
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const { User } = require('./modules/user/schemas/User');
+const { ResumeToken } = require('mongodb');
 
 const PORT = 3000;
 // mongoose.connect(keys.mongoURI);
@@ -45,21 +47,41 @@ io.on('connection', socket => {
 
   socket.on("register", (body) => {
     const { username, email, password } = body;
-
-    if (!username || !email || !password) {
-      socket.emit( 'register', {status: "error", message: "Merci de remplir toutes les cases."} );
-      return;
-    }
-
-    const user = {
-        username,
-        email,
-        password
-    }
-
     console.log("Client registers");
 
-    socket.emit( 'register', {status: "ok", message: userModule.register(user)} );
+    User.findOne({ email: email }, function(err, result) {
+      if (err)
+        socket.emit( 'register', {status: "error", message: "Error while registering account."} );
+      if (result) {
+        socket.emit( 'register', {status: "error", message: "Email already in use."} );
+      } else {
+        // userEmail = true;
+        User.findOne({ username: username }, function(err, result) {
+          if (err)
+            socket.emit( 'register', {status: "error", message: "Error while registering account."} );
+          if (result) {
+            socket.emit( 'register', {status: "error", message: "Username already in use."} );
+          } else {
+            const newUser = new User({
+              email: email,
+              password: password,
+              username: username
+            })
+            newUser.save()
+            emailModule.send({
+              recipient: email,
+              subject: 'Account confirmation',
+              content: 'Welcome on our application!\n\n'
+                  + 'Please confirm your account by clicking the link below:\n'
+                  + `http://localhost:3000/confirm`
+            })
+              .then(info => ["email de confirmation envoyé"])
+              .catch(error => error)
+            socket.emit( 'register', {status: "ok", message: "Account created"} );
+          }
+        })
+      }
+    })
   });
 
 
@@ -67,33 +89,48 @@ io.on('connection', socket => {
 
 
   socket.on("login", (body) => {
-    let user = null;
+    const { email, password } = body;
     console.log("Client logins");
-    User.findOne({ email: body.email })
-        .then(data => {
-            if (data === null) {
-              socket.emit( 'login', {status: "error", message: "Credentials do not match."} );
-              return;
-            }
-            user = data;
-            return (body.password === data.password)
-        })
-        .then(res => {
-            if (res === false) {
-              socket.emit( 'login', {status: "error", message: "Credentials do not match."} );
-              return;
-            }
-            socket.emit( 'login', {status: "ok", message: user} );
-        })
-        .catch((err) => {
-          socket.emit( 'login', {status: "error", message: "Credentials do not match."} );
-        })
+    User.findOne({ email: body.email }, function(err, result) {
+        if (err)
+          socket.emit( 'register', {status: "error", message: "Error while login."} );
+        if (result) {
+          if (result.password = password)
+            socket.emit( 'login', {status: "ok", message: "Loging in"} );
+          else
+            socket.emit( 'register', {status: "error", message: "Credentials do not match."} );
+        } else {
+          socket.emit( 'recover', {status: "error", message: "No account with this email address."} );
+        }
     })
+  })
 
 
 
 
 
+    socket.on("recover", (body) => {
+      const { email } = body;
+      console.log("Client recovers");
+      User.findOne({ email: body.email }, function(err, result) {
+          if (err)
+            socket.emit( 'register', {status: "error", message: "Error while recovering account."} );
+          if (result) {
+            emailModule.send({
+              recipient: email,
+              subject: 'Password reinitialisation',
+              content: 'You are receiving thi email because you (or someone else) asked a password reinitialisation for your account.\n\n'
+                  + 'If you want to reset your password please click the link below\n\t\t'
+                  + `http://localhost:3000/reseting`
+            })
+              .then(info => ["email de recuperation envoyé"])
+              .catch(error => error)
+            socket.emit( 'recover', {status: "ok", message: "Please check your mails"} );
+          } else {
+            socket.emit( 'recover', {status: "error", message: "No account with this email address."} );
+          }  
+      })
+    })
 });
 
 function initServer() {

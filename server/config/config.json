@@ -1,3 +1,5 @@
 {
-    "JWT_SECRET": "jwt-secret"
+    "JWT_SECRET": "jwt-secret",
+    "MAIL_SENDER": "valentin.winnock@epitech.eu",
+    "API_KEY_MAIL": "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"
 }

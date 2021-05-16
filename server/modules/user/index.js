@@ -20,18 +20,23 @@ passport.use('local', new LocalStrategy({
 ))
 
 const _validateEmailUnique = (email) => {
-    return new Promise((resolve, reject) => {
+    const res = new Promise((resolve, reject) => {
         User.findOne({ email: email })
             .then(user => {
                 if (user === null)
                     resolve();
-                reject(new Error('Email already in use'))
+                reject('Email already in use')
             })
             .catch(err => {
+                console.log(err);
                 reject(err)
             })
+    }).catch(err => {
+        throw(err);
     })
+    return res;
 }
+
 
 const _validateUsernameUnique = (username) => {
     return new Promise((resolve, reject) => {
@@ -80,7 +85,8 @@ const registerMail = (id, email) => ({
 const userModule = {
     register: (userData) => {
         return new Promise((resolve, reject) => {
-            _validateEmailUnique(userData.email).then(_validateUsernameUnique(userData.username))
+            _validateEmailUnique(userData.email)
+            // .then(_validateUsernameUnique(userData.username))
                 .then(() => {
                     const newUser = new User({
                         email: userData.email,
@@ -94,9 +100,9 @@ const userModule = {
                     let copy = JSON.parse(JSON.stringify(user))
                     delete copy.password
                     emailModule.send(registerMail(user._id, user.email))
-                        .then(resolve(["user registerd", copy]))
+                        .then(resolve(["Account registered", copy]))
                         .catch(error => error)
-                    resolve(["user registerd", copy])
+                    resolve(["Account registered", copy])
                 })
                 .catch(err => {
                     reject(err)
