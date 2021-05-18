@@ -65,6 +65,7 @@ class App extends Component {
   refresh() {
     this.getRoomMessages();
     this.intervalID = setTimeout(this.refresh.bind(this), 1000);
+    this.setState({ state: this.state });
   }
 
   getRoomMessages() {
