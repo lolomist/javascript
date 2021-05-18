@@ -218,6 +218,20 @@ io.on('connection', socket => {
 
 
 
+    socket.on("addMember", (body) => {
+      console.log("Client add member in: " + body.roomName);
+      Room.findOne({ name: body.roomName }, function(err, result) {
+          if (err)
+            socket.emit('message', {status: "error", message: "Error sending the message."} );
+          if (result) {
+            console.log(body.members);
+            BDDUpdateOneRoom({name: body.roomName}, {members: body.members,});
+           }})
+    })
+
+
+
+
 
     socket.on("messages", (body) => {
       let username = '';
