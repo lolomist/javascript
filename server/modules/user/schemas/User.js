@@ -1,5 +1,5 @@
-const bcrypt = require("bcryptjs");
 const { model, Schema } = require("mongoose");
+const { User } = require('../../user/schemas/User');
 const findOrCreate = require('mongoose-find-or-create')
 
 const UserSchema = new Schema({

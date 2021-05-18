@@ -49,7 +49,7 @@ class App extends Component {
               }
 
               // RegisterEmmit(this.state.name, this.state.firstname, this.state.email, this.state.password);
-              GLOBALS.SOCKET.emit('recover', { email: this.state.email });
+              GLOBALS.SOCKET.emit('recover', { email: this.state.email, deviceId: GLOBALS.DEVICEID.toString() });
               GLOBALS.SOCKET.on('recover', data => {
                 console.log("data: " + data.status + " / " + data.message);
                 if (data.status === "ok") {
@@ -63,6 +63,13 @@ class App extends Component {
                     this.setState({ state: this.state });
                   } else
                     alert(data.message)
+                }
+              });
+              GLOBALS.SOCKET.on('reseting', data => {
+                console.log("data: " + data.status + " / " + data.message);
+                if (data.status === "ok") {
+                    GLOBALS.EMAIL = this.state.email;
+                    this.props.navigation.navigate("Reset");
                 }
               });    
             }

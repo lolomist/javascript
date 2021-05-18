@@ -34,8 +34,29 @@ class App extends Component {
     clearInterval(this.intervalID);
   }
 
-  refresh() {
+  getDataEmail = async () => {
+    try {
+      const value = await AsyncStorage.getItem("Email")
+      if(value !== null)
+        GLOBALS.EMAIL = value.toString();
+    } catch(e) {
+      // error reading value
+    }
+  }
+  getDataPassword = async () => {
+    try {
+      const value = await AsyncStorage.getItem("Password")
+      if(value !== null)
+        GLOBALS.PASS = value.toString();
+    } catch(e) {
+      // error reading value
+    }
+  }
 
+
+  refresh() {
+    this.getDataEmail();
+    this.getDataPassword();
     this.moveSansCompte();
     this.intervalID = setTimeout(this.refresh.bind(this), 1000);
   }
@@ -43,7 +64,10 @@ class App extends Component {
 
   //Navigation vers la page connection
   moveSansCompte() {
-
+    if (GLOBALS.CONNECTED) {
+      if (GLOBALS.EMAIL && GLOBALS.PASS)
+        this.props.navigation.navigate("Chat", { room: 'room1' });
+    }
   }
 
   moveConnection() {

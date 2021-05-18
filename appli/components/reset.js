@@ -33,56 +33,55 @@ class App extends Component {
   //Fontion pour enregistrer un compte dans la BDD
   validateReset() {
     console.log(this.state.condition);
-    if (this.state.condition == true) {
-
-        NetInfo.fetch().then(state => {
-            if (!state.isConnected) {
-              alert("No connection detected, please check your connection");
-            } else {
-              this.state.passwordError = false;
-              this.state.passwordConfirmError = false;
+    NetInfo.fetch().then(state => {
+        if (!state.isConnected) {
+          alert("No connection detected, please check your connection");
+        } else {
+          this.state.passwordError = false;
+          this.state.passwordConfirmError = false;
               
-              if (!this.state.password) {
-                alert("Please fill in all fields");
-                this.state.passwordError = true;
-                this.state.passwordErrorMessage = "Enter a new password you want to use";
-                this.setState({ state: this.state });
-                return ("Invalid password");
-              }
-              if (!this.state.passwordConfirm) {
-                alert("Please fill in all fields");
-                this.state.passwordConfirmError = true;
-                this.state.passwordConfirmErrorMessage = "Confirm the password password you want to use";
-                this.setState({ state: this.state });
-                return ("Invalid password");
-              }
-              if (this.state.passwordConfirm != this.state.password) {
-                alert("the password you entered doesn't matched the confirmation");
-                this.state.passwordConfirmError = true;
-                this.state.passwordConfirmErrorMessage = "Confirm by entering the password you want to use (same as above)";
-                this.setState({ state: this.state });
-                return ("Invalid password");
-              }
+          if (!this.state.password) {
+            alert("Please fill in all fields");
+            this.state.passwordError = true;
+            this.state.passwordErrorMessage = "Enter a new password you want to use";
+            this.setState({ state: this.state });
+            return ("Invalid password");
+          }
+          if (!this.state.passwordConfirm) {
+            alert("Please fill in all fields");
+            this.state.passwordConfirmError = true;
+            this.state.passwordConfirmErrorMessage = "Confirm the new password you want to use";
+            this.setState({ state: this.state });
+            return ("Invalid password");
+          }
+          if (this.state.passwordConfirm != this.state.password) {
+            alert("the password you entered doesn't match the confirmation");
+            this.state.passwordConfirmError = true;
+            this.state.passwordConfirmErrorMessage = "Confirm by entering the password you want to use (same as above)";
+            this.setState({ state: this.state });
+            return ("Invalid password");
+          }
+          if (this.state.password.length < 6 || !/\d/.test(this.state.password)) {
+            alert("Your password must contain at least 6 characters and at least 1 number");
+            this.state.passwordError = true;
+            this.state.passwordErrorMessage = "Enter a valid password";
+            this.setState({ state: this.state });
+            return ("Invalid password");
+          }
 
-              // RegisterEmmit(this.state.name, this.state.firstname, this.state.email, this.state.password);
-              GLOBALS.SOCKET.emit('recover', { email: this.state.email });
-              GLOBALS.SOCKET.on('recover', data => {
-                console.log("data: " + data.status + " / " + data.message);
-                if (data.status === "ok") {
-                    alert("Check your emails!")
-                }
-                else {
-                  if (data.message === "No account with this email address.") {
-                    this.state.emailError = true;
-                    this.state.emailError = "There is not account with this email";
-                    this.setState({ state: this.state });
-                  } else
-                    alert(data.message)
-                }
-              });    
+          console.log("ICI")
+
+          // RegisterEmmit(this.state.name, this.state.firstname, this.state.email, this.state.password);
+          GLOBALS.SOCKET.emit('reset', { email: GLOBALS.EMAIL, password: this.state.password });
+          GLOBALS.SOCKET.on('reset', data => {
+            console.log("data: " + data.status + " / " + data.message);
+            if (data.status === "ok") {
+                alert("password reseted succesfuly!");
+                this.props.navigation.navigate("Connection");
             }
-        });
-    }
+          });    
+        }
+    });
   };
 
   render() {
@@ -104,7 +103,7 @@ class App extends Component {
                   placeholder="Enter the new password you want to use"
                   style={popup.textinput}
                   value={this.state.password}
-                  onChangeText={email => this.setState({ password })}
+                  onChangeText={password => this.setState({ password })}
               />
             )}
             {this.state.passwordError && (
@@ -114,7 +113,7 @@ class App extends Component {
                   placeholder="Enter the new password you want to use"
                   style={popup.textinputRed}
                   value={this.state.password}
-                  onChangeText={email => this.setState({ password })}
+                  onChangeText={password => this.setState({ password })}
               /> 
             )}
             {this.state.passwordError && (
@@ -125,9 +124,9 @@ class App extends Component {
                     label='PasswordConfirm'
                     placeholderTextColor="black"
                     placeholder="Confirm the new password you want to use"
-                    style={popup.textinputRed}
+                    style={popup.textinput}
                     value={this.state.passwordConfirm}
-                    onChangeText={email => this.setState({ passwordConfirm })}
+                    onChangeText={passwordConfirm => this.setState({ passwordConfirm })}
                 />
             )}
             {this.state.passwordConfirmError && (
@@ -137,7 +136,7 @@ class App extends Component {
                     placeholder="Confirm the new password you want to use"
                     style={popup.textinputRed}
                     value={this.state.passwordConfirm}
-                    onChangeText={email => this.setState({ passwordConfirm })}
+                    onChangeText={passwordConfirm => this.setState({ passwordConfirm })}
                 />
             )}
             {this.state.passwordConfirmError && (

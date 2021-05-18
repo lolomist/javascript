@@ -1,5 +1,6 @@
 const http = require('http');
 const express = require('express');
+const router = express.Router();
 const socketIO = require('socket.io');
 const mongoose = require('mongoose');
 //const keys = require('./config/keys');
@@ -11,13 +12,16 @@ const emailModule = require('./modules/mail/index')
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const { User } = require('./modules/user/schemas/User');
+const { Room } = require('./modules/room/schemas/Room');
 const { ResumeToken } = require('mongodb');
+const { Body } = require('node-fetch');
 
 const PORT = 3000;
 // mongoose.connect(keys.mongoURI);
 
 const app = express();
 const server = http.createServer(app);
+var clients = {};
 
 async function initDatabase () {
   const db = "mongodb+srv://valentin:J2uaZNgIM02cRrGo@cluster0.3bakk.mongodb.net/test"
@@ -37,9 +41,34 @@ async function initDatabase () {
     })
 }
 
+async function BDDUpdateOneUser(querry, args) {
+  await User.updateOne(querry, args);
+}
+
+async function BDDUpdateOneRoom(querry, args) {
+  await Room.updateOne(querry, args);
+}
+
 const io = socketIO(server);
 io.on('connection', socket => {
   console.log('client connected on websocket');
+  socket.on("registerSocket", (body) => {
+    console.log("Adding client: " + body.deviceId + " | " + socket.id)
+    clients[body.deviceId] = socket.id;
+  });
+
+
+
+
+
+  socket.on("disconnect", (reason) => {
+    console.log("Client disconnected: " + reason);
+    const clientId = Object.keys(clients).find(key => clients[key] === socket.socketId);
+    if (clientId !== null) {
+      delete clients[clientId];
+      console.log("Client disconnected successfully");
+    }
+  });
 
 
 
@@ -73,7 +102,7 @@ io.on('connection', socket => {
               subject: 'Account confirmation',
               content: 'Welcome on our application!\n\n'
                   + 'Please confirm your account by clicking the link below:\n'
-                  + `http://localhost:3000/confirm`
+                  + `http://localhost:3000/confirm?email=${email}`
             })
               .then(info => ["email de confirmation envoyé"])
               .catch(error => error)
@@ -93,14 +122,17 @@ io.on('connection', socket => {
     console.log("Client logins");
     User.findOne({ email: body.email }, function(err, result) {
         if (err)
-          socket.emit( 'register', {status: "error", message: "Error while login."} );
+          socket.emit( 'login', {status: "error", message: "Error while login."} );
         if (result) {
-          if (result.password = password)
+          console.log("ver: " + result.verified)
+          if (!result.verified)
+            socket.emit( 'login', {status: "error", message: "Account not verified."} );
+          else if (result.password === password)
             socket.emit( 'login', {status: "ok", message: "Loging in"} );
           else
-            socket.emit( 'register', {status: "error", message: "Credentials do not match."} );
+            socket.emit( 'login', {status: "error", message: "Credentials do not match."} );
         } else {
-          socket.emit( 'recover', {status: "error", message: "No account with this email address."} );
+          socket.emit( 'login', {status: "error", message: "No account with this email address."} );
         }
     })
   })
@@ -114,14 +146,14 @@ io.on('connection', socket => {
       console.log("Client recovers");
       User.findOne({ email: body.email }, function(err, result) {
           if (err)
-            socket.emit( 'register', {status: "error", message: "Error while recovering account."} );
+            socket.emit( 'recover', {status: "error", message: "Error while recovering account."} );
           if (result) {
             emailModule.send({
               recipient: email,
               subject: 'Password reinitialisation',
               content: 'You are receiving thi email because you (or someone else) asked a password reinitialisation for your account.\n\n'
                   + 'If you want to reset your password please click the link below\n\t\t'
-                  + `http://localhost:3000/reseting`
+                  + `http://localhost:3000/reseting?deviceId=${body.deviceId}`
             })
               .then(info => ["email de recuperation envoyé"])
               .catch(error => error)
@@ -131,7 +163,91 @@ io.on('connection', socket => {
           }  
       })
     })
+
+
+
+
+
+    socket.on("reset", (body) => {
+      console.log("Client resets");
+      User.findOne({ email: body.email }, function(err, result) {
+          if (err)
+            socket.emit( 'reset', {status: "error", message: "Error while reseting account password."} );
+          if (result) {
+            BDDUpdateOneUser({email: body.email}, {password: body.password});
+            socket.emit( 'reset', {status: "ok", message: "Password reset succesfuly"} );
+          } else {
+            socket.emit( 'reset', {status: "error", message: "No account with this email address."} );
+          }  
+      })
+    })
+
+
+
+
+
+    socket.on("message", (body) => {
+      console.log("Client sends a message in: " + body.roomName);
+      Room.findOne({ name: body.roomName }, function(err, result) {
+          if (err)
+            socket.emit( 'message', {status: "error", message: "Error sending the message."} );
+          if (result) {
+            console.log(result.messages);
+            const messages = result.messages;
+            console.log("messages of " + body.roomName + " : " + messages);
+            messages.push(body.message);
+            console.log("messages of " + body.roomName + " : " + messages);
+            BDDUpdateOneRoom({name: body.roomName}, {messages: messages});
+            socket.emit( 'message', {status: "ok", message: "Message sent."} );
+          } else {
+            socket.emit( 'message', {status: "error", message: "No Room :c"} );
+          }  
+      })
+    })
+
+
+
+
+
+    socket.on("messages", (body) => {
+      let username = '';
+      console.log("Client " + body.email + " asks for messages of room: " + body.roomName);
+      User.findOne({ email: body.email }, function(err, result) {
+        if (err)
+          socket.emit( 'messages', {status: "error", message: "Error while identifying user who asks messages."} );
+        if (result)
+          username = result.username.toString();
+        else
+          socket.emit( 'messages', {status: "error", message: "No user with this email."} );
+      })
+      Room.findOne({ name: body.roomName }, function(err, result) {
+          if (err)
+            socket.emit( 'messages', {status: "error", message: "Error searching for the room."} );
+          if (result)
+            socket.emit( 'messages', {status: "ok", message: result.messages} );
+          else
+            socket.emit( 'messages', {status: "error", message: "No Room to get messages from."} );
+      })
+    })
 });
+
+app.get('/reseting', function(req, res) {
+  const deviceId = req.query.deviceId;
+  const socketId = clients[deviceId];
+  if (socketId !== null)
+    io.to(socketId).emit( 'reseting', {status: "ok", message: ""} )
+});
+
+app.get('/confirm', function(req, res) {
+  const email = req.query.email;
+  if (email !== null)
+    User.findOne({ email: email }, function(err, result) {
+      if (result) {
+        BDDUpdateOneUser({email: email}, {verified: true});
+      }
+    })
+});
+
 
 function initServer() {
   // app.use('/users/', userRoutes)

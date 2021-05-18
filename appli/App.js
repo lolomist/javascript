@@ -7,6 +7,7 @@ import Inscription from './components/inscription'
 import Connection from './components/connection'
 import Recover from './components/recover'
 import Reset from './components/reset'
+import Chat from './components/chat'
 import GLOBALS from "./components/globals.js";
 import { Connect } from './components/socket';
 
@@ -17,7 +18,8 @@ const AppNavigator = createStackNavigator({
   Connection: {screen: Connection },
   Inscription: {screen: Inscription },
   Recover: {screen: Recover },
-  Reset: {screen: Reset }
+  Reset: {screen: Reset },
+  Chat: {screen: Chat }
 },
 {
 initialRouteName: 'Accueil',

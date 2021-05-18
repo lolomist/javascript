@@ -57,7 +57,29 @@ class App extends Component {
           this.state.passwordError = false;
           let re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
+          this.setState({ state: this.state });
           // error management
+          if (!this.state.username) {
+            alert("Please fill in all fields");
+            this.state.usernameError = true;
+            this.state.usernameErrorMessage = "This field is required";
+            this.setState({ state: this.state });
+            return ("Invalid username");
+          }
+          if (!this.state.email) {
+            alert("Please fill in all fields");
+            this.state.emailError = true;
+            this.state.emailErrorMessage = "This field is required";
+            this.setState({ state: this.state });
+            return ("Invalid email address");
+          }
+          if (!this.state.password) {
+            alert("Please fill in all fields");
+            this.state.passwordError = true;
+            this.state.passwordErrorMessage = "This field is required";
+            this.setState({ state: this.state });
+            return ("Invalid password");
+          }
           if (this.state.username.includes("@")) {
             alert("Please enter a valid username");
             this.state.usernameError = true;
@@ -80,22 +102,21 @@ class App extends Component {
             return ("Invalid password");
           }
 
-          this.setState({ state: this.state });
-
           // RegisterEmmit(this.state.name, this.state.firstname, this.state.email, this.state.password);
           GLOBALS.SOCKET.emit('register', { username: this.state.username, email: this.state.email, password: this.state.password });
           GLOBALS.SOCKET.on('register', data => {
             console.log("data: " + data.status + " / " + data.message);
             if (data.status === "ok") {
-                alert("Inscription réussie !")
+                alert("Registration succesful !")
                 this.moveConnection();
             } else {
               console.log(data.message)
               if (data.message === "Email already in use.") {
                 this.state.emailError = true;
-                this.state.emailErrorMessage = "Enter a valid email address";
+                this.state.emailErrorMessage = "There is already an account with this email";
                 this.showPopupRecupMdp();
               } else if (data.message === "Username already in use.") {
+                alert("Username already in use.")
                 this.state.usernameError = true;
                 this.state.usernameErrorMessage = "This username is already taken";
                 this.setState({ state: this.state });
