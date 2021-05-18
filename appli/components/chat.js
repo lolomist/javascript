@@ -17,7 +17,10 @@ class App extends Component {
     super(props);
     this.state = {
       roomName: '',
-      members: [''],
+      members: [],
+      selectedOwner: [''],
+      selectedMember: [],
+      contacts:[],
       message: '',
       messages: [{}],
       popupOwnerSettings: false,
@@ -29,11 +32,19 @@ class App extends Component {
     this.showMemberSettingsPopup = this.showMemberSettingsPopup.bind(this);
     this.hideMemberSettingsPopup = this.hideMemberSettingsPopup.bind(this);
     this.hideOwnerSettingsPopup = this.hideOwnerSettingsPopup.bind(this);
+    this.removeSelectedOwner = this.removeSelectedOwner.bind(this);
+    this.removeSelectedMember = this.removeSelectedMember.bind(this);
+    this.addSelectedOwner = this.addSelectedOwner.bind(this);
+    this.addSelectedMember = this.addSelectedMember.bind(this);
+    this.renderItem = this.renderItem.bind(this);
+    this.renderItemMember = this.renderItemMember.bind(this);
     this.moveToRecover = this.moveToRecover.bind(this);
+    this.addContacts = this.addContacts.bind(this);
   }
 
   componentDidMount() {
     this.state.roomName = this.props.navigation.getParam('room', 'room1');
+    GLOBALS.CONTACTS = ["valentinw", "arthurq", "antoine"];
     GLOBALS.SOCKET.on('messages', data => {
         //console.log("data: " + data.status + " / " + data.message);
         if (data.status === "ok") {
@@ -50,6 +61,11 @@ class App extends Component {
       if (data.status === "ok") {
           console.log(data.message.toString().split(","));
           this.state.members = data.message.toString().split(",");
+          this.state.contacts = [];
+          GLOBALS.CONTACTS.forEach(element => {
+            if (!this.state.members.includes(element) && element != "")
+            this.state.contacts.push(element);
+          });
       } else {
         ;
       }
@@ -66,7 +82,7 @@ class App extends Component {
   };
 
   refresh() {
-    this.getRoomMessages();
+    //this.getRoomMessages();
     this.intervalID = setTimeout(this.refresh.bind(this), 1000);
     this.setState({ state: this.state });
   }
@@ -102,9 +118,7 @@ class App extends Component {
         alert("No connection detected, please check your connection");
       } else {
         console.log(this.state.members);
-        if (this.state.members[0] === "") {
-          GLOBALS.SOCKET.emit('getMembers', { email: GLOBALS.EMAIL, roomName: this.state.roomName });
-        }
+        GLOBALS.SOCKET.emit('getMembers', { email: GLOBALS.EMAIL, roomName: this.state.roomName });
       }
     });
     this.setState({ popupOwnerSettings: true });
@@ -112,6 +126,42 @@ class App extends Component {
   hideOwnerSettingsPopup() {
     this.setState({ popupOwnerSettings: false });
   };
+
+  removeSelectedOwner(item) {
+    console.log("removing " + item);
+    if (this.state.selectedOwner.includes(item)) {
+      this.state.selectedOwner.splice(this.state.selectedOwner.indexOf(item), 1)
+      //this.state.selectedMembers.pop(item);
+      this.setState({ state: this.state });
+    }
+  }
+
+  addSelectedOwner(item) {
+    console.log("adding " + item);
+    if (!this.state.selectedOwner.includes(item)) {
+      this.state.selectedOwner.push(item);
+      this.setState({ state: this.state });
+    }
+  }
+
+  renderItem(item) {
+    const backgroundColor = this.state.selectedOwner.includes(item) ? "#6e3b6e" : "#f9c2ff";
+    const color = this.state.selectedOwner.includes(item) ? 'white' : 'black';
+
+    if (this.state.selectedOwner.includes(item)) {
+      return (
+        <TouchableOpacity onPress={() => this.removeSelectedOwner(item)} style={{width: "100%", height: 50, padding: 5, flexDirection: "row", justifyContent:"flex-start", alignItems: "center", marginTop:30, borderRadius: 30, backgroundColor}}>
+          <Text style={{flex: 1, textAlign: "center", fontSize: 20, color}}>{item}</Text>
+        </TouchableOpacity>
+      );
+    } else {
+      return (
+        <TouchableOpacity onPress={() => this.addSelectedOwner(item)} style={{width: "100%", height: 50, padding: 5, flexDirection: "row", justifyContent:"flex-start", alignItems: "center", marginTop:30, borderRadius: 30, backgroundColor}}>
+          <Text style={{flex: 1, textAlign: "center", fontSize: 20, color}}>{item}</Text>
+        </TouchableOpacity>
+      );
+    }
+  }
 
   moveToRecover() {
   };
@@ -122,9 +172,7 @@ class App extends Component {
         alert("No connection detected, please check your connection");
       } else {
         console.log(this.state.members);
-        if (this.state.members[0] === "") {
-          GLOBALS.SOCKET.emit('getMembers', { email: GLOBALS.EMAIL, roomName: this.state.roomName });
-        }
+        GLOBALS.SOCKET.emit('getMembers', { email: GLOBALS.EMAIL, roomName: this.state.roomName });
       }
     });
     this.setState({ popupMemberSettings: true });
@@ -132,6 +180,58 @@ class App extends Component {
   hideMemberSettingsPopup() {
     this.setState({ popupMemberSettings: false });
   };
+
+  removeSelectedMember(item) {
+    console.log("removing " + item);
+    if (this.state.selectedMember.includes(item)) {
+      this.state.selectedMember.splice(this.state.selectedMember.indexOf(item), 1);
+      this.setState({ state: this.state });
+    }
+  }
+
+  addSelectedMember(item) {
+    console.log("adding to selected list of member:" + item);
+    if (!this.state.selectedMember.includes(item)) {
+      this.state.selectedMember.push(item);
+      this.setState({ state: this.state });
+    }
+  }
+
+  addContacts() {
+    NetInfo.fetch().then(state => {
+      if (!state.isConnected) {
+        alert("No connection detected, please check your connection");
+      } else {
+        console.log("set member to room on server :" + this.state.selectedMember.concat(this.state.members));
+        if (this.state.selectedMember[0] != "") {
+          GLOBALS.SOCKET.emit('addMember', { members: this.state.selectedMember.concat(this.state.members), roomName: this.state.roomName });
+          this.state.selectedMember = [];
+          this.state.members = [];
+          console.log(this.state.selectedMember);
+          this.setState({ popupMemberSettings: false });
+        }
+      }
+    });
+  };
+
+  renderItemMember(item) {
+    const backgroundColor = this.state.selectedMember.includes(item) ? "#5ADE7EF0" : "#5ADED8F0";
+    const color = this.state.selectedMember.includes(item) ? '#DEB45A' : 'black';
+
+    if (this.state.selectedMember.includes(item)) {
+      return (
+        <TouchableOpacity onPress={() => this.removeSelectedMember(item)} style={{width: "100%", height: 50, padding: 5, flexDirection: "row", justifyContent:"flex-start", alignItems: "center", marginTop:30, borderRadius: 30, backgroundColor}}>
+          <Text style={{flex: 1, textAlign: "center", fontSize: 20, color}}>{item}</Text>
+        </TouchableOpacity>
+      );
+    } else {
+      return (
+        <TouchableOpacity onPress={() => this.addSelectedMember(item)} style={{width: "100%", height: 50, padding: 5, flexDirection: "row", justifyContent:"flex-start", alignItems: "center", marginTop:30, borderRadius: 30, backgroundColor}}>
+          <Text style={{flex: 1, textAlign: "center", fontSize: 20, color}}>{item}</Text>
+        </TouchableOpacity>
+      );
+    }
+  }
 
   render() {
     return (
@@ -209,11 +309,7 @@ class App extends Component {
                   <FlatList 
                     data={this.state.members}
                     keyExtractor={item => item}
-                    renderItem={({ item }) =>
-                      <TouchableOpacity onPress={this.hideOwnerSettingsPopup} style={{width: "100%", height: 50, padding: 5, flexDirection: "row", justifyContent:"flex-start", alignItems: "center", marginTop:30, backgroundColor: "grey", borderRadius: 30}}>
-                        <Text style={{ flex: 1, textAlign: "center", fontSize: 20, color: "black" }}>{item}</Text>
-                      </TouchableOpacity>
-                    }
+                    renderItem={({ item }) => this.renderItem(item)}
                   />
                 </View>
               </View>
@@ -232,15 +328,16 @@ class App extends Component {
                   </TouchableOpacity>
                 </View>
                 <View style={{width: "100%", height: "70%", padding: 20, backgroundColor: "red", shadowColor: "#303838", shadowOffset: { width: 0, height: 5 }, shadowRadius: 10, shadowOpacity: 0.45}}>
-                  <FlatList 
-                    data={this.state.members}
+                <FlatList 
+                    data={this.state.contacts}
                     keyExtractor={item => item}
-                    renderItem={({ item }) =>
-                      <TouchableOpacity onPress={this.hideMemberSettingsPopup} style={{width: "100%", height: 50, padding: 5, flexDirection: "row", justifyContent:"flex-start", alignItems: "center", marginTop:30, backgroundColor: "grey", borderRadius: 30}}>
-                        <Text style={{ flex: 1, textAlign: "center", fontSize: 20, color: "black" }}>{item}</Text>
-                      </TouchableOpacity>
-                    }
+                    renderItem={({ item }) => this.renderItemMember(item)}
                   />
+                </View>
+                <View>
+                  <TouchableOpacity onPress={this.addContacts} style={{width: "100%", height: 50, padding: 5, flexDirection: "row", justifyContent:"flex-end", alignItems: "center", marginTop:30, backgroundColor: "grey", borderRadius: 30}}>
+                    <Text style={{ flex: 1, textAlign: "center", fontSize: 20, color: "black" }}>ADD</Text>
+                  </TouchableOpacity>
                 </View>
               </View>
             </View>
