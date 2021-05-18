@@ -6,6 +6,7 @@ export default {
   SOCKET: null,
   EMAIL: "",
   PASS: "",
+  CONTACTS: [""],
   DEVICEID: "",
   CONNECTED: false,
 };

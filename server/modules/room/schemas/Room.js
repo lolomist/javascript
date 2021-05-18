@@ -13,7 +13,16 @@ const RoomSchema = new Schema({
         required: true
     },
     messages: [
-        {type: String}
+        {date: {
+            type: String,
+            required: true
+        },user: {
+            type: String,
+            required: true
+        },message: {
+            type: String,
+            required: true
+        }}
     ],
 })
 

@@ -17,13 +17,15 @@ class App extends Component {
     super(props);
     this.state = {
       roomName: '',
+      members: [''],
       message: '',
-      messages: ['']
+      messages: [{}],
+      popupOwnerSettings: false
     }
     this.sendMessage = this.sendMessage.bind(this);
     this.getRoomMessages = this.getRoomMessages.bind(this);
-    this.showPopupRecupMdp = this.showPopupRecupMdp.bind(this);
-    this.hidePopupRecupMdp = this.hidePopupRecupMdp.bind(this);
+    this.showOwnerSettingsPopup = this.showOwnerSettingsPopup.bind(this);
+    this.hideOwnerSettingsPopup = this.hideOwnerSettingsPopup.bind(this);
     this.moveToRecover = this.moveToRecover.bind(this);
   }
 
@@ -33,11 +35,21 @@ class App extends Component {
         //console.log("data: " + data.status + " / " + data.message);
         if (data.status === "ok") {
             //console.log(data.message.toString().split(","));
-            this.state.messages = data.message.toString().split(",");
+            //this.state.messages = data.message[i].message.toString();
+            this.state.messages = data.message;
         } else {
         // récup de l'archive ici: this.state.messages = les_messages_archivés
           ;
         }
+    });
+    GLOBALS.SOCKET.on('getMembers', data => {
+      console.log("data: " + data.status + " / " + data.message);
+      if (data.status === "ok") {
+          console.log(data.message.toString().split(","));
+          this.state.members = data.message.toString().split(",");
+      } else {
+        ;
+      }
     });
     this.refresh();
   }
@@ -73,32 +85,64 @@ class App extends Component {
         } else {
             if (this.state.message !== null) {
                 console.log(this.state.message + " | " + this.state.roomName)
-                GLOBALS.SOCKET.emit('message', { message: this.state.message, roomName: this.state.roomName });
+                GLOBALS.SOCKET.emit('message', { message: this.state.message, roomName: this.state.roomName , email: GLOBALS.EMAIL, date: Date.now()});
+                this.state.message = "";
             }
         }
     });
   };
 
-  showPopupRecupMdp() {
+  showOwnerSettingsPopup() {
+    NetInfo.fetch().then(state => {
+      if (!state.isConnected) {
+        alert("No connection detected, please check your connection");
+      } else {
+        console.log(this.state.members);
+        if (this.state.members[0] === "") {
+          GLOBALS.SOCKET.emit('getMembers', { email: GLOBALS.EMAIL, roomName: this.state.roomName });
+        }
+      }
+    });
+    this.setState({ popupOwnerSettings: true });
   };
-  hidePopupRecupMdp() {
+  hideOwnerSettingsPopup() {
+    this.setState({ popupOwnerSettings: false });
   };
+
   moveToRecover() {
   };
 
   render() {
     return (
       <View style={containers.container}>
-        <View style={blockacceuil.block2}>
-            <Text style={blockacceuil.textBlock}>Chat</Text>
+        <View style={{flex: 1, flexDirection: "row", width: "100%", height: "15%", padding: 30}}>
+            <TouchableOpacity onPress={this.showOwnerSettingsPopup} style={{flexDirection: "row", backgroundColor: "white", height: "100%", width: "17%"}}>
+                <View style={{borderRadius: 5, borderColor: 'black', width: "100%", height: "100%", alignItems: "center", backgroundColor: "#CDCDCD"}}>
+                    <Image
+                        style={{marginTop: "17%", marginBottom: "17%", height: "60%", width: "70%", alignSelf: "center"}}
+                        source={require('../assets/icon-add-contact.png')}
+                    />
+                </View>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={this.showOwnerSettingsPopup} style={{flexDirection: "row", backgroundColor: "white", height: "100%", width: "17%"}}>
+                <View style={{borderRadius: 5, borderColor: 'black', width: "100%", height: "100%", alignItems: "center", backgroundColor: "#CDCDCD"}}>
+                    <Image
+                        style={{marginTop: "17%", marginBottom: "17%", height: "60%", width: "70%", alignSelf: "center"}}
+                        source={require('../assets/icon-owner-settings.png')}
+                    />
+                </View>
+            </TouchableOpacity>
         </View>
 
-        <View style={blockacceuil.block3}>
+        <View style={{width: "100%", height: "70%", padding: 20, backgroundColor: "white", shadowColor: "#303838", shadowOffset: { width: 0, height: 5 }, shadowRadius: 10, shadowOpacity: 0.45}}>
             <FlatList 
                 data={this.state.messages}
-                keyExtractor={item => item}
-                renderItem={({ item }) =>
-                    <Text style={{ fontSize: 20, color: "black" }}>- {item}</Text>
+                keyExtractor={(item, index) => index.toString()}
+                inverted
+                contentContainerStyle={{ flexDirection: 'column-reverse' }}
+                renderItem={({item}) =>
+                  <View style={{padding:5,marginBottom: 5,backgroundColor: "#D5D8DC44", shadowColor: "#303838", shadowOffset: { width: 0, height: 5 }, shadowRadius: 10, shadowOpacity: 0.4}}><Text style={{ fontSize: 20, color: "black" }}>{item.user} the {new Date(parseInt(item.date)).toDateString()}</Text>
+                  <Text style={{ fontSize: 20, color: "black" }}>- {item.message}</Text></View>
                 }
             />
         </View>
@@ -122,12 +166,39 @@ class App extends Component {
             <TouchableOpacity onPress={this.sendMessage} style={{flexDirection: "row", backgroundColor: "white", height: "100%", width: "17%"}}>
                 <View style={{borderRadius: 5, borderColor: 'black', width: "100%", height: "100%", alignItems: "center", backgroundColor: "#CDCDCD"}}>
                     <Image
-                        style={{marginTop: "17%", marginBottom: "17%", height: "60%", width: "70%", alignSelf: "center"}}
-                        source={require('../assets/white-arrow.png')}
+                        style={{marginTop: "13%", marginBottom: "17%", height: "60%", width: "55%", alignSelf: "center"}}
+                        source={require('../assets/icon-email-send.png')}
                     />
                 </View>
             </TouchableOpacity>
         </View>
+
+        {this.state.popupOwnerSettings && (
+          <View style={popup.popup}>
+            <View style={popup.popup2}>
+              <View style={containers.container}>
+                <View style={{width:"100%",alignItems:"center", backgroundColor: "black"}}>
+                  <TouchableOpacity onPress={this.hideOwnerSettingsPopup} style={blockacceuil.blockRecup2}>
+                    <View style={blockacceuil.logoConnection}>
+                      <Text style={blockacceuil.textLogoConnection3}>x</Text>
+                    </View>
+                  </TouchableOpacity>
+                </View>
+                <View style={{width: "100%", height: "70%", padding: 20, backgroundColor: "red", shadowColor: "#303838", shadowOffset: { width: 0, height: 5 }, shadowRadius: 10, shadowOpacity: 0.45}}>
+                  <FlatList 
+                    data={this.state.members}
+                    keyExtractor={item => item}
+                    renderItem={({ item }) =>
+                      <TouchableOpacity onPress={this.hideOwnerSettingsPopup} style={{width: "100%", height: 50, padding: 5, flexDirection: "row", justifyContent:"flex-start", alignItems: "center", marginTop:30, backgroundColor: "grey", borderRadius: 30}}>
+                        <Text style={{ flex: 1, textAlign: "center", fontSize: 20, color: "black" }}>{item}</Text>
+                      </TouchableOpacity>
+                    }
+                  />
+                </View>
+              </View>
+            </View>
+          </View>
+        )}
       </View>
 
     )

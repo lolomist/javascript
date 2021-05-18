@@ -193,15 +193,25 @@ io.on('connection', socket => {
             socket.emit( 'message', {status: "error", message: "Error sending the message."} );
           if (result) {
             console.log(result.messages);
-            const messages = result.messages;
-            console.log("messages of " + body.roomName + " : " + messages);
-            messages.push(body.message);
-            console.log("messages of " + body.roomName + " : " + messages);
-            BDDUpdateOneRoom({name: body.roomName}, {messages: messages});
-            socket.emit( 'message', {status: "ok", message: "Message sent."} );
+            User.findOne({ email: body.email }, function(err, res) {
+              if (err)
+                socket.emit( 'messages', {status: "error", message: "Error while identifying user who asks messages."} );
+              if (res) {
+                username = res.username.toString();
+                var message = {"date": body.date,"user": username,"message": body.message};
+                const messages = result.messages;
+                console.log("messages of " + body.roomName + " : " + body.message);
+                messages.push(message);
+                console.log("messages of " + body.roomName + " : " + body.message);
+                BDDUpdateOneRoom({name: body.roomName}, {messages: messages,});
+                socket.emit( 'message', {status: "ok", message: "Message sent."} );
+              }
+              else
+                socket.emit( 'messages', {status: "error", message: "No user with this email."} );
+            })
           } else {
             socket.emit( 'message', {status: "error", message: "No Room :c"} );
-          }  
+          }
       })
     })
 
@@ -227,6 +237,31 @@ io.on('connection', socket => {
             socket.emit( 'messages', {status: "ok", message: result.messages} );
           else
             socket.emit( 'messages', {status: "error", message: "No Room to get messages from."} );
+      })
+    })
+
+
+
+
+
+    socket.on("getMembers", (body) => {
+      let username = '';
+      console.log("Client " + body.email + " asks for members of room: " + body.roomName);
+      User.findOne({ email: body.email }, function(err, result) {
+        if (err)
+          socket.emit( 'getMembers', {status: "error", message: "Error while identifying user who asks messages."} );
+        if (result)
+          username = result.username.toString();
+        else
+          socket.emit( 'getMembers', {status: "error", message: "No user with this email."} );
+      })
+      Room.findOne({ name: body.roomName }, function(err, result) {
+          if (err)
+            socket.emit( 'getMembers', {status: "error", message: "Error searching for the room."} );
+          if (result)
+            socket.emit( 'getMembers', {status: "ok", message: result.members} );
+          else
+            socket.emit( 'getMembers', {status: "error", message: "No Room to get messages from."} );
       })
     })
 });

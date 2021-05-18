@@ -1,6 +1,6 @@
 import socketIO from 'socket.io-client';
 import GLOBALS from "./globals.js";
-import AsyncStorage from '@react-native-community/async-storage';
+import {AsyncStorage} from "react-native";
 
 const socket = socketIO('http://10.0.2.2:3000', {
   transports: ['websocket'], 
