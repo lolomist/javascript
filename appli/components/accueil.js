@@ -6,7 +6,7 @@ import {
   StatusBar,
  } from 'react-native';
  import { containers, blockacceuil } from '../components/styles'
- import AsyncStorage from '@react-native-community/async-storage'
+ import {AsyncStorage} from "react-native"
  import GLOBALS from "../components/globals.js";
  import NetInfo from '@react-native-community/netinfo';
 

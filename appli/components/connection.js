@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, Image, View, TextInput, TouchableOpacity, Button } from 'react-native';
-import AsyncStorage from '@react-native-community/async-storage'
+import {AsyncStorage} from "react-native"
 import { containers, blockacceuil, popup } from '../components/styles'
 import GLOBALS from "../components/globals.js";
 import NetInfo from '@react-native-community/netinfo';
