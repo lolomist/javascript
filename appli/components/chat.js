@@ -18,7 +18,7 @@ class App extends Component {
     this.state = {
       roomName: '',
       message: '',
-      messages: []
+      messages: ['']
     }
     this.sendMessage = this.sendMessage.bind(this);
     this.getRoomMessages = this.getRoomMessages.bind(this);
@@ -96,6 +96,7 @@ class App extends Component {
         <View style={blockacceuil.block3}>
             <FlatList 
                 data={this.state.messages}
+                keyExtractor={item => item}
                 renderItem={({ item }) =>
                     <Text style={{ fontSize: 20, color: "black" }}>- {item}</Text>
                 }
