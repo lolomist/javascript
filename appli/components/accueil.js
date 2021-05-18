@@ -71,7 +71,8 @@ class App extends Component {
           if (data.status === "ok") {
             clearInterval(this.intervalID);
             GLOBALS.USERNAME = data.message.toString();
-            this.props.navigation.navigate("Chat", { room: 'room1' });
+            this.props.navigation.navigate("Contact");
+            // this.props.navigation.navigate("Chat", { room: 'room1' });
           } else
             GLOBALS.CONNECTED = false;
         });
