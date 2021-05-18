@@ -45,6 +45,10 @@ class App extends Component {
     this.addContacts = this.addContacts.bind(this);
   }
 
+  componentWillUnmount() {
+    clearInterval(this.intervalID);
+  }
+
   componentDidMount() {
     this.state.roomName = this.props.navigation.getParam('room', 'room1');
     GLOBALS.SOCKET.on('getOwner', data => {
