@@ -8,6 +8,8 @@ import Connection from './components/connection'
 import Recover from './components/recover'
 import Reset from './components/reset'
 import Chat from './components/chat'
+import Contact from './components/contacts'
+import Messages from './components/messages'
 import GLOBALS from "./components/globals.js";
 import { Connect } from './components/socket';
 
@@ -19,7 +21,9 @@ const AppNavigator = createStackNavigator({
   Inscription: {screen: Inscription },
   Recover: {screen: Recover },
   Reset: {screen: Reset },
-  Chat: {screen: Chat }
+  Chat: {screen: Chat },
+  Contact: {screen: Contact },
+  Messages: {screen: Messages }
 },
 {
 initialRouteName: 'Accueil',
