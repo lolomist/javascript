@@ -18,6 +18,7 @@ class App extends Component {
     this.state = {
       roomName: '',
       members: [''],
+      selectedOwner: [''],
       message: '',
       messages: [{}],
       popupOwnerSettings: false,
@@ -29,6 +30,9 @@ class App extends Component {
     this.showMemberSettingsPopup = this.showMemberSettingsPopup.bind(this);
     this.hideMemberSettingsPopup = this.hideMemberSettingsPopup.bind(this);
     this.hideOwnerSettingsPopup = this.hideOwnerSettingsPopup.bind(this);
+    this.removeSelectedOwner = this.removeSelectedOwner.bind(this);
+    this.addSelectedOwner = this.addSelectedOwner.bind(this);
+    this.renderItem = this.renderItem.bind(this);
     this.moveToRecover = this.moveToRecover.bind(this);
   }
 
@@ -66,7 +70,7 @@ class App extends Component {
   };
 
   refresh() {
-    this.getRoomMessages();
+    //this.getRoomMessages();
     this.intervalID = setTimeout(this.refresh.bind(this), 1000);
     this.setState({ state: this.state });
   }
@@ -112,6 +116,42 @@ class App extends Component {
   hideOwnerSettingsPopup() {
     this.setState({ popupOwnerSettings: false });
   };
+
+  removeSelectedOwner(item) {
+    console.log("removing " + item);
+    if (this.state.selectedOwner.includes(item)) {
+      this.state.selectedOwner.splice(this.state.selectedOwner.indexOf(item), 1)
+      //this.state.selectedMembers.pop(item);
+      this.setState({ state: this.state });
+    }
+  }
+
+  addSelectedOwner(item) {
+    console.log("adding " + item);
+    if (!this.state.selectedOwner.includes(item)) {
+      this.state.selectedOwner.push(item);
+      this.setState({ state: this.state });
+    }
+  }
+
+  renderItem(item) {
+    const backgroundColor = this.state.selectedOwner.includes(item) ? "#6e3b6e" : "#f9c2ff";
+    const color = this.state.selectedOwner.includes(item) ? 'white' : 'black';
+
+    if (this.state.selectedOwner.includes(item)) {
+      return (
+        <TouchableOpacity onPress={() => this.removeSelectedOwner(item)} style={{width: "100%", height: 50, padding: 5, flexDirection: "row", justifyContent:"flex-start", alignItems: "center", marginTop:30, borderRadius: 30, backgroundColor}}>
+          <Text style={{flex: 1, textAlign: "center", fontSize: 20, color}}>{item}</Text>
+        </TouchableOpacity>
+      );
+    } else {
+      return (
+        <TouchableOpacity onPress={() => this.addSelectedOwner(item)} style={{width: "100%", height: 50, padding: 5, flexDirection: "row", justifyContent:"flex-start", alignItems: "center", marginTop:30, borderRadius: 30, backgroundColor}}>
+          <Text style={{flex: 1, textAlign: "center", fontSize: 20, color}}>{item}</Text>
+        </TouchableOpacity>
+      );
+    }
+  }
 
   moveToRecover() {
   };
@@ -209,11 +249,7 @@ class App extends Component {
                   <FlatList 
                     data={this.state.members}
                     keyExtractor={item => item}
-                    renderItem={({ item }) =>
-                      <TouchableOpacity onPress={this.hideOwnerSettingsPopup} style={{width: "100%", height: 50, padding: 5, flexDirection: "row", justifyContent:"flex-start", alignItems: "center", marginTop:30, backgroundColor: "grey", borderRadius: 30}}>
-                        <Text style={{ flex: 1, textAlign: "center", fontSize: 20, color: "black" }}>{item}</Text>
-                      </TouchableOpacity>
-                    }
+                    renderItem={({ item }) => this.renderItem(item)}
                   />
                 </View>
               </View>
