@@ -17,8 +17,9 @@ class App extends Component {
     super(props);
     this.state = {
       roomName: '',
+      roomOwner: '',
       members: [''],
-      selectedOwner: [''],
+      selectedOwner: '',
       message: '',
       messages: [{}],
       popupOwnerSettings: false,
@@ -32,19 +33,28 @@ class App extends Component {
     this.hideOwnerSettingsPopup = this.hideOwnerSettingsPopup.bind(this);
     this.removeSelectedOwner = this.removeSelectedOwner.bind(this);
     this.addSelectedOwner = this.addSelectedOwner.bind(this);
-    this.renderItem = this.renderItem.bind(this);
+    this.renderItemOwners = this.renderItemOwners.bind(this);
+    this.changeOwner = this.changeOwner.bind(this);
     this.moveToRecover = this.moveToRecover.bind(this);
   }
 
   componentDidMount() {
     this.state.roomName = this.props.navigation.getParam('room', 'room1');
+    GLOBALS.SOCKET.emit('getOwner', { message: this.state.message, roomName: this.state.roomName , email: GLOBALS.EMAIL, date: Date.now()});
+    GLOBALS.SOCKET.on('getOwner', data => {
+      console.log("data: " + data.status + " / " + data.message);
+      if (data.status === "ok") {
+          console.log(data.message);
+          this.state.roomOwner = data.message.toString();
+          console.log(GLOBALS.USERNAME);
+          console.log(this.state.roomOwner);
+      }
+    });
     GLOBALS.SOCKET.on('messages', data => {
         //console.log("data: " + data.status + " / " + data.message);
-        if (data.status === "ok") {
-            //console.log(data.message.toString().split(","));
-            //this.state.messages = data.message[i].message.toString();
+        if (data.status === "ok")
             this.state.messages = data.message;
-        } else {
+        else {
         // récup de l'archive ici: this.state.messages = les_messages_archivés
           ;
         }
@@ -54,8 +64,6 @@ class App extends Component {
       if (data.status === "ok") {
           console.log(data.message.toString().split(","));
           this.state.members = data.message.toString().split(",");
-      } else {
-        ;
       }
     });
     this.refresh();
@@ -70,7 +78,7 @@ class App extends Component {
   };
 
   refresh() {
-    //this.getRoomMessages();
+    this.getRoomMessages();
     this.intervalID = setTimeout(this.refresh.bind(this), 1000);
     this.setState({ state: this.state });
   }
@@ -114,31 +122,30 @@ class App extends Component {
     this.setState({ popupOwnerSettings: true });
   };
   hideOwnerSettingsPopup() {
+    this.state.selectedOwner = '';
     this.setState({ popupOwnerSettings: false });
   };
 
   removeSelectedOwner(item) {
-    console.log("removing " + item);
     if (this.state.selectedOwner.includes(item)) {
-      this.state.selectedOwner.splice(this.state.selectedOwner.indexOf(item), 1)
-      //this.state.selectedMembers.pop(item);
+      console.log("removing " + item);
+      this.state.selectedOwner = '';
       this.setState({ state: this.state });
     }
   }
-
   addSelectedOwner(item) {
-    console.log("adding " + item);
-    if (!this.state.selectedOwner.includes(item)) {
-      this.state.selectedOwner.push(item);
+    if (this.state.selectedOwner === '') {
+      console.log("adding " + item);
+      this.state.selectedOwner = item;
       this.setState({ state: this.state });
     }
   }
 
-  renderItem(item) {
-    const backgroundColor = this.state.selectedOwner.includes(item) ? "#6e3b6e" : "#f9c2ff";
-    const color = this.state.selectedOwner.includes(item) ? 'white' : 'black';
+  renderItemOwners(item) {
+    const backgroundColor = item === this.state.selectedOwner ? "#5ADE7EF0" : "#5ADED8F0";
+    const color = item === this.state.selectedOwner ? '#DEB45A' : 'black';
 
-    if (this.state.selectedOwner.includes(item)) {
+    if (item === this.state.selectedOwner) {
       return (
         <TouchableOpacity onPress={() => this.removeSelectedOwner(item)} style={{width: "100%", height: 50, padding: 5, flexDirection: "row", justifyContent:"flex-start", alignItems: "center", marginTop:30, borderRadius: 30, backgroundColor}}>
           <Text style={{flex: 1, textAlign: "center", fontSize: 20, color}}>{item}</Text>
@@ -173,10 +180,26 @@ class App extends Component {
     this.setState({ popupMemberSettings: false });
   };
 
+  changeOwner() {
+    NetInfo.fetch().then(state => {
+      if (!state.isConnected) {
+        alert("No connection detected, please check your connection");
+      } else {
+        console.log(this.state.selectedOwner);
+        if (this.state.selectedOwner !== "") {
+          GLOBALS.SOCKET.emit('setOwner', { userName: this.state.selectedOwner, roomName: this.state.roomName });
+          this.hideOwnerSettingsPopup();
+          this.state.roomOwner = this.state.selectedOwner;
+        }
+      }
+    });
+  };
+
   render() {
     return (
       <View style={containers.container}>
         <View style={{flex: 1, flexDirection: "row", width: "100%", height: "15%", padding: 30}}>
+            {GLOBALS.USERNAME === this.state.roomOwner && (
             <TouchableOpacity onPress={this.showMemberSettingsPopup} style={{flexDirection: "row", backgroundColor: "white", height: "100%", width: "17%"}}>
                 <View style={{borderRadius: 5, borderColor: 'black', width: "100%", height: "100%", alignItems: "center", backgroundColor: "#CDCDCD"}}>
                     <Image
@@ -185,14 +208,17 @@ class App extends Component {
                     />
                 </View>
             </TouchableOpacity>
-            <TouchableOpacity onPress={this.showOwnerSettingsPopup} style={{flexDirection: "row", backgroundColor: "white", height: "100%", width: "17%"}}>
-                <View style={{borderRadius: 5, borderColor: 'black', width: "100%", height: "100%", alignItems: "center", backgroundColor: "#CDCDCD"}}>
-                    <Image
-                        style={{marginTop: "17%", marginBottom: "17%", height: "60%", width: "70%", alignSelf: "center"}}
-                        source={require('../assets/icon-owner-settings.png')}
-                    />
-                </View>
-            </TouchableOpacity>
+            )}
+            {GLOBALS.USERNAME === this.state.roomOwner && (
+              <TouchableOpacity onPress={this.showOwnerSettingsPopup} style={{flexDirection: "row", backgroundColor: "white", height: "100%", width: "17%"}}>
+                  <View style={{borderRadius: 5, borderColor: 'black', width: "100%", height: "100%", alignItems: "center", backgroundColor: "#CDCDCD"}}>
+                      <Image
+                          style={{marginTop: "17%", marginBottom: "17%", height: "60%", width: "70%", alignSelf: "center"}}
+                          source={require('../assets/icon-owner-settings.png')}
+                      />
+                  </View>
+              </TouchableOpacity>
+            )}
         </View>
 
         <View style={{width: "100%", height: "70%", padding: 20, backgroundColor: "white", shadowColor: "#303838", shadowOffset: { width: 0, height: 5 }, shadowRadius: 10, shadowOpacity: 0.45}}>
@@ -249,9 +275,23 @@ class App extends Component {
                   <FlatList 
                     data={this.state.members}
                     keyExtractor={item => item}
-                    renderItem={({ item }) => this.renderItem(item)}
+                    renderItem={({ item }) => this.renderItemOwners(item)}
                   />
                 </View>
+                {this.state.selectedOwner === '' && (
+                  <View style={{flexDirection: "row", alignItems: "center", justifyContent:"center"}}>
+                    <TouchableOpacity style={{width: "65%", height: 50, padding: 5, flexDirection: "row", justifyContent:"flex-start", alignItems: "center", marginTop:30, backgroundColor: "grey", borderRadius: 30}}>
+                      <Text style={blockacceuil.textConnection}>Set owner</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+                {this.state.selectedOwner !== '' && (
+                  <View style={{flexDirection: "row", alignItems: "center", justifyContent:"center"}}>
+                    <TouchableOpacity onPress={this.changeOwner} style={{width: "65%", height: 50, padding: 5, flexDirection: "row", justifyContent:"flex-start", alignItems: "center", marginTop:30, backgroundColor: "#FF4500", borderRadius: 30}}>
+                      <Text style={blockacceuil.textConnection}>Set owner</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
               </View>
             </View>
           </View>

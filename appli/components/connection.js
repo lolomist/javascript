@@ -97,6 +97,7 @@ export default class App extends React.Component {
             this.storeDataEmail(this.state.email);
             this.storeDataPassword(this.state.password);
             console.log("Going to the chat");
+            GLOBALS.USERNAME = data.message.toString();
             this.props.navigation.navigate("Chat", { room: 'room1' });
           } else {
             if (data.message === "No account with this email address.") {

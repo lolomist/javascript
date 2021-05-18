@@ -8,7 +8,7 @@ const RoomSchema = new Schema({
             required: true
         }
     ],
-    ownerId: {
+    owner: {
         type: String,
         required: true
     },
