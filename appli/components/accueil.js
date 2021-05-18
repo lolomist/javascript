@@ -66,12 +66,10 @@ class App extends Component {
   moveSansCompte() {
     if (GLOBALS.CONNECTED) {
       if (GLOBALS.EMAIL && GLOBALS.PASS)
-        GLOBALS.SOCKET.emit('login', { email: this.state.email, password: this.state.password });
+        GLOBALS.SOCKET.emit('login', { email: GLOBALS.EMAIL, password: GLOBALS.PASS });
         GLOBALS.SOCKET.on('login', data => {
-          console.log("data: " + data.status + " / " + data.message);
           if (data.status === "ok") {
-            console.log("Connected!");
-            console.log("Going to the chat");
+            clearInterval(this.intervalID);
             this.props.navigation.navigate("Chat", { room: 'room1' });
           } else
             GLOBALS.CONNECTED = false;

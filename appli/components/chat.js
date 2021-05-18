@@ -20,11 +20,14 @@ class App extends Component {
       members: [''],
       message: '',
       messages: [{}],
-      popupOwnerSettings: false
+      popupOwnerSettings: false,
+      popupMemberSettings: false
     }
     this.sendMessage = this.sendMessage.bind(this);
     this.getRoomMessages = this.getRoomMessages.bind(this);
     this.showOwnerSettingsPopup = this.showOwnerSettingsPopup.bind(this);
+    this.showMemberSettingsPopup = this.showMemberSettingsPopup.bind(this);
+    this.hideMemberSettingsPopup = this.hideMemberSettingsPopup.bind(this);
     this.hideOwnerSettingsPopup = this.hideOwnerSettingsPopup.bind(this);
     this.moveToRecover = this.moveToRecover.bind(this);
   }
@@ -113,11 +116,28 @@ class App extends Component {
   moveToRecover() {
   };
 
+  showMemberSettingsPopup() {
+    NetInfo.fetch().then(state => {
+      if (!state.isConnected) {
+        alert("No connection detected, please check your connection");
+      } else {
+        console.log(this.state.members);
+        if (this.state.members[0] === "") {
+          GLOBALS.SOCKET.emit('getMembers', { email: GLOBALS.EMAIL, roomName: this.state.roomName });
+        }
+      }
+    });
+    this.setState({ popupMemberSettings: true });
+  };
+  hideMemberSettingsPopup() {
+    this.setState({ popupMemberSettings: false });
+  };
+
   render() {
     return (
       <View style={containers.container}>
         <View style={{flex: 1, flexDirection: "row", width: "100%", height: "15%", padding: 30}}>
-            <TouchableOpacity onPress={this.showOwnerSettingsPopup} style={{flexDirection: "row", backgroundColor: "white", height: "100%", width: "17%"}}>
+            <TouchableOpacity onPress={this.showMemberSettingsPopup} style={{flexDirection: "row", backgroundColor: "white", height: "100%", width: "17%"}}>
                 <View style={{borderRadius: 5, borderColor: 'black', width: "100%", height: "100%", alignItems: "center", backgroundColor: "#CDCDCD"}}>
                     <Image
                         style={{marginTop: "17%", marginBottom: "17%", height: "60%", width: "70%", alignSelf: "center"}}
@@ -191,6 +211,32 @@ class App extends Component {
                     keyExtractor={item => item}
                     renderItem={({ item }) =>
                       <TouchableOpacity onPress={this.hideOwnerSettingsPopup} style={{width: "100%", height: 50, padding: 5, flexDirection: "row", justifyContent:"flex-start", alignItems: "center", marginTop:30, backgroundColor: "grey", borderRadius: 30}}>
+                        <Text style={{ flex: 1, textAlign: "center", fontSize: 20, color: "black" }}>{item}</Text>
+                      </TouchableOpacity>
+                    }
+                  />
+                </View>
+              </View>
+            </View>
+          </View>
+        )}
+        {this.state.popupMemberSettings && (
+          <View style={popup.popup}>
+            <View style={popup.popup2}>
+              <View style={containers.container}>
+                <View style={{width:"100%",alignItems:"center", backgroundColor: "black"}}>
+                  <TouchableOpacity onPress={this.hideMemberSettingsPopup} style={blockacceuil.blockRecup2}>
+                    <View style={blockacceuil.logoConnection}>
+                      <Text style={blockacceuil.textLogoConnection3}>x</Text>
+                    </View>
+                  </TouchableOpacity>
+                </View>
+                <View style={{width: "100%", height: "70%", padding: 20, backgroundColor: "red", shadowColor: "#303838", shadowOffset: { width: 0, height: 5 }, shadowRadius: 10, shadowOpacity: 0.45}}>
+                  <FlatList 
+                    data={this.state.members}
+                    keyExtractor={item => item}
+                    renderItem={({ item }) =>
+                      <TouchableOpacity onPress={this.hideMemberSettingsPopup} style={{width: "100%", height: 50, padding: 5, flexDirection: "row", justifyContent:"flex-start", alignItems: "center", marginTop:30, backgroundColor: "grey", borderRadius: 30}}>
                         <Text style={{ flex: 1, textAlign: "center", fontSize: 20, color: "black" }}>{item}</Text>
                       </TouchableOpacity>
                     }
