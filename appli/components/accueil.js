@@ -70,7 +70,8 @@ class App extends Component {
         GLOBALS.SOCKET.on('login', data => {
           if (data.status === "ok") {
             clearInterval(this.intervalID);
-            this.props.navigation.navigate("Chat", { room: 'room1' });
+            this.props.navigation.navigate("Contact");
+//            this.props.navigation.navigate("Chat", { room: 'room1' });
           } else
             GLOBALS.CONNECTED = false;
         });
