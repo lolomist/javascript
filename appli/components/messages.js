@@ -17,11 +17,14 @@ class App extends Component {
     super(props);
     this.state = {
       popupCreateRoom: false,
+      popupContactList: false,
       rooms: []
     }
     this.getRoomlist = this.getRoomlist.bind(this);
-    this.moveToMessage = this.moveToMessage.bind(this);
+    this.moveToContacts = this.moveToContacts.bind(this);
+    this.showPopupContactList = this.showPopupContactList.bind(this);
     this.showPopupCreateRoom = this.showPopupCreateRoom.bind(this);
+    this.hidePopupContactList = this.hidePopupContactList.bind(this);
     this.hidePopupCreateRoom = this.hidePopupCreateRoom.bind(this);
   }
 
@@ -42,7 +45,7 @@ class App extends Component {
     this.setState({ value: event.target.value });
   }
 
-  moveToMessage() {
+  moveToContacts() {
     this.props.navigation.navigate("contacts");
   };
 
@@ -66,6 +69,14 @@ class App extends Component {
     })
   };
 
+  showPopupContactList() {
+    this.setState({ popupContactList: true });
+  };
+
+  hidePopupContactList() {
+    this.setState({ popupContactList: false });
+  };
+
   showPopupCreateRoom() {
     this.setState({ popupCreateRoom: true });
   };
@@ -79,7 +90,7 @@ class App extends Component {
 
       <View style={containers.container}>
         <View style={{ flex: 1, flexDirection: "row", width: "100%", padding: 5 }}>
-          <TouchableOpacity onPress={this.moveToMessage} style={{width: 60 }}>
+          <TouchableOpacity onPress={this.moveToContacts} style={{width: 60 }}>
             <View style={{ borderRadius: 5, width: "100%", height: "100%", alignItems: "center", backgroundColor: "#CDCDCD" }}>
               <Image
                 style={{height: "90%", width: "90%", alignSelf: "center" }}
@@ -98,36 +109,26 @@ class App extends Component {
           </TouchableOpacity>
 
           {this.state.popupCreateRoom && (
-            <View style={popup.popup}>
-              <View style={popup.popup2}>
-                <View style={containers.container}>
-                  <Text style={{ fontSize: 25 }}>Veuillez renseigner votre nouvel ami.</Text>
-                  <View style={{ width: "100%", top: "30%" }}>
+                <View style={{position: 'absolute', left: 10, right: 10, top: 100, backgroundColor: "white", zIndex: 90, padding: 10,}}>
+                  <Text style={{ fontSize: 25 }}>create a room</Text>
+                  <TouchableOpacity onPress={this.hidePopupCreateRoom} style={{position: 'absolute', right: 10}}>
+                    <View style={blockacceuil.logoConnection}>
+                      <Text style={blockacceuil.textLogoConnection3}>x</Text>
+                    </View>
+                  </TouchableOpacity>
+                  <View style={{ width: "100%",}}>
                     <TextInput
-                      placeholder="Username"
+                      placeholder="nom de la room"
                       placeholderTextColor="black"
                       style={popup.textinput}
                       onChangeText={text => this.setState({ emailDeRecup: text })} />
                   </View>
-                  <Text style={{ fontSize: 25 }}>Veuillez renseigner un ami.</Text>
-                  <View style={{ width: "100%", top: "30%" }}>
-                    <TextInput
-                      placeholder="Username"
-                      placeholderTextColor="black"
-                      style={popup.textinput}
-                      onChangeText={text => this.setState({ emailDeRecup: text })} />
-                  </View>
-
-                  <View style={{ width: "100%", alignItems: "center", top: "50%" }}>
-                    <TouchableOpacity onPress={this.hidePopupCreateRoom} style={blockacceuil.blockRecup2}>
-                      <View style={blockacceuil.logoConnection}>
-                        <Text style={blockacceuil.textLogoConnection3}>x</Text>
-                      </View>
-                    </TouchableOpacity>
-                  </View>
+                  <TouchableOpacity onPress={this.showPopupCreateRoom} style={{borderRadius: 5, padding: 5, marginTop: 10, alignSelf: 'center', backgroundColor: "#60B34560"}}>
+                    <View>
+                      <Text>Choose contacts to invite</Text>
+                    </View>
+                  </TouchableOpacity>
                 </View>
-              </View>
-            </View>
           )}
 
         </View>
