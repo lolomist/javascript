@@ -76,14 +76,17 @@ class App extends Component {
   };
 
   showPopupAddFriend() {
+    console.log("showed");
     this.setState({ popupAddfriend: true });
   };
 
   hidePopupAddFriend() {
+    console.log("hidded");
     this.setState({ popupAddfriend: false });
   };
 
   closePopupAddFriend() {
+    console.log("closed");
     NetInfo.fetch().then(state => {
 
     });
@@ -121,7 +124,7 @@ class App extends Component {
             </View>
           </TouchableOpacity>
 
-          {this.state.popupAddfriend && (
+          <View>
             <View style={popup.popup}>
               <View style={popup.popup2}>
                 <View style={containers.container}>
@@ -150,9 +153,8 @@ class App extends Component {
                 </View>
               </View>
             </View>
-          )}
+          </View>        </View>
 
-        </View>
 
         <View style={{ width: "100%", height: "70%", padding: 20, backgroundColor: "red", shadowColor: "#303838", shadowOffset: { width: 0, height: 5 }, shadowRadius: 10, shadowOpacity: 0.45 }}>
           <FlatList
