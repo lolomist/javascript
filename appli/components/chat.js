@@ -29,6 +29,7 @@ class App extends Component {
     }
     this.sendMessage = this.sendMessage.bind(this);
     this.getRoomMessages = this.getRoomMessages.bind(this);
+    this.getRoomOwner = this.getRoomOwner.bind(this);
     this.showOwnerSettingsPopup = this.showOwnerSettingsPopup.bind(this);
     this.showMemberSettingsPopup = this.showMemberSettingsPopup.bind(this);
     this.hideMemberSettingsPopup = this.hideMemberSettingsPopup.bind(this);
@@ -46,15 +47,9 @@ class App extends Component {
 
   componentDidMount() {
     this.state.roomName = this.props.navigation.getParam('room', 'room1');
-    GLOBALS.SOCKET.emit('getOwner', { message: this.state.message, roomName: this.state.roomName , email: GLOBALS.EMAIL, date: Date.now()});
     GLOBALS.SOCKET.on('getOwner', data => {
-      console.log("data: " + data.status + " / " + data.message);
-      if (data.status === "ok") {
-          console.log(data.message);
+      if (data.status === "ok")
           this.state.roomOwner = data.message.toString();
-          console.log(GLOBALS.USERNAME);
-          console.log(this.state.roomOwner);
-      }
     });
     GLOBALS.CONTACTS = ["valentinw", "arthurq", "antoine"];
     GLOBALS.SOCKET.on('messages', data => {
@@ -67,9 +62,8 @@ class App extends Component {
         }
     });
     GLOBALS.SOCKET.on('getMembers', data => {
-      console.log("data: " + data.status + " / " + data.message);
+      // console.log("data: " + data.status + " / " + data.message);
       if (data.status === "ok") {
-          console.log(data.message.toString().split(","));
           this.state.members = data.message.toString().split(",");
           this.state.contacts = [];
           GLOBALS.CONTACTS.forEach(element => {
@@ -92,6 +86,7 @@ class App extends Component {
   };
 
   refresh() {
+    this.getRoomOwner();
     this.getRoomMessages();
     this.intervalID = setTimeout(this.refresh.bind(this), 1000);
     this.setState({ state: this.state });
@@ -103,6 +98,16 @@ class App extends Component {
           alert("No connection detected, please check your connection");
         } else { 
             GLOBALS.SOCKET.emit('messages', { email: GLOBALS.EMAIL, roomName: this.state.roomName });
+        }
+    });
+  };
+  
+  getRoomOwner() {
+    NetInfo.fetch().then(state => {
+        if (!state.isConnected) {
+          alert("No connection detected, please check your connection");
+        } else { 
+          GLOBALS.SOCKET.emit('getOwner', { roomName: this.state.roomName });
         }
     });
   };
