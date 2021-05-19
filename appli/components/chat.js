@@ -19,6 +19,7 @@ class App extends Component {
       roomName: '',
       roomOwner: '',
       selectedOwner: '',
+      isASpy: false,
       members: [],
       selectedMember: [],
       contacts:[],
@@ -61,11 +62,16 @@ class App extends Component {
           this.state.roomOwner = data.message.toString();
     });
     GLOBALS.SOCKET.on('messages', data => {
-        //console.log("data: " + data.status + " / " + data.message);
+      //console.log("data: " + data.status + " / " + data.message);
         if (data.status === "ok")
+          if (data.message === "Not member") {
+            if (data.content.length > 0) {
+              this.state.messages = data.content;
+              this.state.isASpy = true;
+            }
+          } else
             this.state.messages = data.message;
         else {
-        // récup de l'archive ici: this.state.messages = les_messages_archivés
           ;
         }
     });
@@ -108,8 +114,9 @@ class App extends Component {
     NetInfo.fetch().then(state => {
         if (!state.isConnected) {
           alert("No connection detected, please check your connection");
-        } else { 
-            GLOBALS.SOCKET.emit('messages', { email: GLOBALS.EMAIL, roomName: this.state.roomName });
+        } else {
+            if (!this.state.isASpy)
+              GLOBALS.SOCKET.emit('messages', { email: GLOBALS.EMAIL, roomName: this.state.roomName });
         }
     });
   };
@@ -127,7 +134,9 @@ class App extends Component {
   //Fontion pour envoyer un message dans la room
   sendMessage() {
     NetInfo.fetch().then(state => {
-        if (!state.isConnected) {
+        if (this.state.isASpy) {
+          alert("You can't send messages in a room your are not member of");
+        } else if (!state.isConnected) {
           alert("No connection detected, please check your connection");
         } else {
             if (this.state.message !== null) {

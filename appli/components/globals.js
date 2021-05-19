@@ -10,5 +10,8 @@ export default {
   CONTACTS: [""],
   DEVICEID: "",
   CONNECTED: false,
+  ONSOCKET: {
+    MESSAGES: false
+  },
 };
  

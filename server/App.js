@@ -262,22 +262,34 @@ io.on('connection', socket => {
 
   socket.on("messages", (body) => {
     let username = '';
+    let messages = [{}];
     //console.log("Client " + body.email + " asks for messages of room: " + body.roomName);
     User.findOne({ email: body.email }, function (err, result) {
       if (err)
         socket.emit('messages', { status: "error", message: "Error while identifying user who asks messages." });
-      if (result)
-        username = result.username.toString();
-      else
+      if (result) {
+        username = result.username;
+        messages = result["rooms"];
+        Room.findOne({ name: body.roomName }, function (err, res) {
+          if (err)
+            socket.emit('messages', { status: "error", message: "Error searching for the room." });
+          if (res) {
+            if (res.members.includes(username))
+              socket.emit('messages', { status: "ok", message: res.messages });
+            else {
+              for (const [key, value] of Object.entries(messages)) {
+                if (value["roomName"] == res.name) {
+                  messages = messages[key]["archived"]["message"];
+                  break;
+                }
+              }
+              socket.emit('messages', { status: "ok", message: "Not member", content: messages });
+            }
+          } else
+            socket.emit('messages', { status: "error", message: "No Room to get messages from." });
+        })
+      } else
         socket.emit('messages', { status: "error", message: "No user with this email." });
-    })
-    Room.findOne({ name: body.roomName }, function (err, result) {
-      if (err)
-        socket.emit('messages', { status: "error", message: "Error searching for the room." });
-      if (result)
-        socket.emit('messages', { status: "ok", message: result.messages });
-      else
-        socket.emit('messages', { status: "error", message: "No Room to get messages from." });
     })
   })
 
