@@ -56,17 +56,14 @@ class App extends Component {
   }
   //Navigation vers la page connection
   moveConnection() {
-    clearInterval(this.intervalID);
     this.props.navigation.navigate("Connection");
   };
 
   moveToMessages() {
-    clearInterval(this.intervalID);
     this.props.navigation.navigate("Messages");
   };
 
   moveToContacts() {
-    clearInterval(this.intervalID);
     this.props.navigation.navigate("Contact");
   };
 
