@@ -325,7 +325,7 @@ class App extends Component {
                     {this.state.date < (parseInt(item.date)) && (
                       <Text style={{ fontSize: 20, color: "red" }}>New Message !</Text>
                     )}
-                    <Text style={{ fontSize: 20, color: "black" }}>{item.user} the {new Date(parseInt(item.date)).toString()}</Text>
+                    <Text style={{ fontSize: 20, color: "black" }}>{item.user} the {new Date(parseInt(item.date)).toUTCString().substring(0,new Date(parseInt(item.date)).toUTCString().length - 4)}</Text>
                     <Text style={{ fontSize: 20, color: "black" }}>- {item.message}</Text>
                   </View>
                 }
