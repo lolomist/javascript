@@ -226,7 +226,8 @@ io.on('connection', socket => {
       if (result) {
         console.log(body.members);
         BDDUpdateOneRoom({ name: body.roomName }, { members: body.members, });
-      }
+      } else
+      socket.emit('message', { status: "error", message: "Error sending the message." });
     })
   })
 

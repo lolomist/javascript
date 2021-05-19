@@ -6,6 +6,7 @@ import {
   TextInput,
   Image,
   FlatList,
+  Alert,
 } from 'react-native';
 import { containers, blockacceuil, popup } from '../components/styles'
 import GLOBALS from "../components/globals.js";
@@ -53,10 +54,7 @@ class App extends Component {
       }
     });
     GLOBALS.SOCKET.on('addContacts', data => {
-      if (!this.alertPresent) {
-        this.alertPresent = true;
-          Alert.alert(data.Message[{ text: 'OK', onPress: () => { this.alertPresent = false } }], { cancelable: false });
-      }
+        alert(data.message);
     });
 
     this.refresh();
