@@ -9,6 +9,33 @@ const UserSchema = new Schema({
     password: {type: String},
     username: {type: String},
     friends: [{type: String}],
+    rooms: [
+        {roomName: {
+            type: String,
+            required: true
+        },archived: [{
+            status: {
+                type: Boolean,
+                required: true
+            },
+            message: [
+                {date: {
+                    type: String,
+                    required: true
+                },user: {
+                    type: String,
+                    required: true
+                },message: {
+                    type: String,
+                    required: true
+                },
+                required: true
+                }
+            ],
+        }],
+        default: null
+        }
+    ],
     date: {
         type: Date,
         default: Date.now
