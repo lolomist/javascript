@@ -341,8 +341,13 @@ io.on('connection', socket => {
       if (err)
         socket.emit('getRooms', { status: "error", message: "Error while identifying user who asks friends." });
       if (result) {
-        //some truc
-        socket.emit('getRooms', { status: "ok", message: result.friends });
+        let rooms = [];
+        for (const [key, value] of Object.entries(result.rooms)) {
+          console.log(result.rooms[key]["roomName"]);
+          rooms.push(result.rooms[key]["roomName"]);
+        }
+        console.log(rooms);
+        socket.emit('getRooms', { status: "ok", message: rooms });
       } else
         socket.emit('getRooms', { status: "error", message: "No user with this email." });
     })

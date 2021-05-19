@@ -189,6 +189,9 @@ class App extends Component {
           <FlatList
             data={GLOBALS.CONTACTS}
             keyExtractor={item => item}
+            ListEmptyComponent={({item}) => {
+              return (<Text style={{ flex: 1, textAlign: "center", fontSize: 30, color: "black" }}>No contact added yet</Text>);
+            }}
             renderItem={({ item }) =>
               <Text style={{ flex: 1, textAlign: "center", fontSize: 30, color: "black" }}>{item}</Text>
             }

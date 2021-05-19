@@ -19,7 +19,7 @@ class App extends Component {
       popupCreateRoom: false,
       popupContactList: false,
       selectContacts: [],
-      rooms: ["room1", "pastoucher"],
+      rooms: [],
       roomName: ""
     }
     this.getRoomlist = this.getRoomlist.bind(this);
@@ -72,7 +72,7 @@ class App extends Component {
         alert("No connection detected, please check your connection");
       } else
         if (!this.state.rooms[0])
-          ;//GLOBALS.SOCKET.emit('getRooms', { email: GLOBALS.EMAIL });
+          GLOBALS.SOCKET.emit('getRooms', { email: GLOBALS.EMAIL });
     })
   };
 
@@ -219,6 +219,9 @@ class App extends Component {
           <FlatList
             data={this.state.rooms}
             keyExtractor={(item, index) => index.toString()}
+            ListEmptyComponent={({item}) => {
+              return (<Text style={{ flex: 1, textAlign: "center", fontSize: 25, color: "black" }}>No Room</Text>);
+            }}
             renderItem={({ item }) =>
               <TouchableOpacity onPress={() => this.moveToRoom(item)} style={{borderRadius: 10, backgroundColor: "#6555F260",margin: 5, padding: 5,}}>
                 <View>
