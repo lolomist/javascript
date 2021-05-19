@@ -24,7 +24,11 @@ class App extends Component {
 
   handleChange(event) {
     this.setState({ value: event.target.value });
-  } 
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.intervalID);
+  }
 
   componentDidMount() {
     this.refresh();
