@@ -93,7 +93,7 @@ const userModule = {
                         password: userData.password,
                         username: userData.username
                     })
-                    console.log("2-User password: " + userData.password)
+                    //console.log("2-User password: " + userData.password)
                     return newUser.save()
                 })
                 .then(user => {

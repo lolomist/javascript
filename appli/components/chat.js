@@ -51,6 +51,7 @@ class App extends Component {
 
   componentDidMount() {
     this.state.roomName = this.props.navigation.getParam('room', 'room1');
+    this.getDataDate();
     GLOBALS.SOCKET.on('getOwner', data => {
       if (data.status === "ok")
           this.state.roomOwner = data.message.toString();
@@ -122,7 +123,7 @@ class App extends Component {
           alert("No connection detected, please check your connection");
         } else {
             if (this.state.message !== null) {
-                console.log(this.state.message + " | " + this.state.roomName)
+                //console.log(this.state.message + " | " + this.state.roomName)
                 GLOBALS.SOCKET.emit('message', { message: this.state.message, roomName: this.state.roomName , email: GLOBALS.EMAIL, date: Date.now()});
                 this.state.message = "";
             }
@@ -135,7 +136,7 @@ class App extends Component {
       if (!state.isConnected) {
         alert("No connection detected, please check your connection");
       } else {
-        console.log(this.state.members);
+        //console.log(this.state.members);
         GLOBALS.SOCKET.emit('getMembers', { email: GLOBALS.EMAIL, roomName: this.state.roomName });
       }
     });
@@ -148,14 +149,14 @@ class App extends Component {
 
   removeSelectedOwner(item) {
     if (this.state.selectedOwner.includes(item)) {
-      console.log("removing " + item);
+     //console.log("removing " + item);
       this.state.selectedOwner = '';
       this.setState({ state: this.state });
     }
   }
   addSelectedOwner(item) {
     if (this.state.selectedOwner === '') {
-      console.log("adding " + item);
+      //console.log("adding " + item);
       this.state.selectedOwner = item;
       this.setState({ state: this.state });
     }
@@ -188,7 +189,7 @@ class App extends Component {
       if (!state.isConnected) {
         alert("No connection detected, please check your connection");
       } else {
-        console.log(this.state.members);
+        //console.log(this.state.members);
         GLOBALS.SOCKET.emit('getMembers', { email: GLOBALS.EMAIL, roomName: this.state.roomName });
       }
     });
@@ -203,7 +204,7 @@ class App extends Component {
       if (!state.isConnected) {
         alert("No connection detected, please check your connection");
       } else {
-        console.log(this.state.selectedOwner);
+        //console.log(this.state.selectedOwner);
         if (this.state.selectedOwner !== "") {
           GLOBALS.SOCKET.emit('setOwner', { userName: this.state.selectedOwner, roomName: this.state.roomName });
           this.hideOwnerSettingsPopup();
@@ -214,7 +215,7 @@ class App extends Component {
   };
 
   removeSelectedMember(item) {
-    console.log("removing " + item);
+    //console.log("removing " + item);
     if (this.state.selectedMember.includes(item)) {
       this.state.selectedMember.splice(this.state.selectedMember.indexOf(item), 1);
       this.setState({ state: this.state });
@@ -222,7 +223,7 @@ class App extends Component {
   }
 
   addSelectedMember(item) {
-    console.log("adding to selected list of member:" + item);
+    //console.log("adding to selected list of member:" + item);
     if (!this.state.selectedMember.includes(item)) {
       this.state.selectedMember.push(item);
       this.setState({ state: this.state });
@@ -234,12 +235,12 @@ class App extends Component {
       if (!state.isConnected) {
         alert("No connection detected, please check your connection");
       } else {
-        console.log("set member to room on server :" + this.state.selectedMember.concat(this.state.members));
+        //console.log("set member to room on server :" + this.state.selectedMember.concat(this.state.members));
         if (this.state.selectedMember[0] != "") {
           GLOBALS.SOCKET.emit('addMember', { members: this.state.selectedMember.concat(this.state.members), roomName: this.state.roomName });
           this.state.selectedMember = [];
           this.state.members = [];
-          console.log(this.state.selectedMember);
+          //console.log(this.state.selectedMember);
           this.setState({ popupMemberSettings: false });
         }
       }
