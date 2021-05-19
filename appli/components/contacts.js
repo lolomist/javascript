@@ -21,8 +21,10 @@ class App extends Component {
       alertMessage: '',
       condition: true,
       emailError: false,
+      maFriend: '',
       emailErrorMessage: ''
     }
+    this.alertPresent = false;
     this.getContactlist = this.getContactlist.bind(this);
     this.moveToRecover = this.moveToRecover.bind(this);
     this.moveToMessages = this.moveToMessages.bind(this);
@@ -48,6 +50,13 @@ class App extends Component {
         ;
       }
     });
+    GLOBALS.SOCKET.on('addContacts', data => {
+      if (!this.alertPresent) {
+        this.alertPresent = true;
+          Alert.alert(data.Message[{ text: 'OK', onPress: () => { this.alertPresent = false } }], { cancelable: false });
+      }
+    });
+
     this.refresh();
   }
 
@@ -99,19 +108,18 @@ class App extends Component {
 
   sendFriendInvite() {
     NetInfo.fetch().then(state => {
+      console.log(this.state.maFriend);
       if (!state.isConnected) {
         alert("No connection detected, please check your connection");
       } else {
-        console.log("Send pending request :" + this.state.selectedMember.concat(this.state.members));
-        if (this.state.selectedMember[0] != "") {
-          GLOBALS.SOCKET.emit('addContacts', { members: this.state.selectedMember.concat(this.state.members)});
-       
-          console.log(this.state.selectedMember);
+        console.log("Sending pending request to:" + this.state.maFriend);
+        if (this.state.maFriend != "") {
+          GLOBALS.SOCKET.emit('addContacts', { email: GLOBALS.EMAIL, contact: this.state.maFriend });
           this.setState({ popupAddfriend: false });
         }
       }
     });
-};
+  };
 
 
   render() {
@@ -136,7 +144,7 @@ class App extends Component {
               />
             </View>
           </TouchableOpacity>
-          <Text style={{paddingLeft: 20,fontSize: 50}}>Contacts</Text>
+          <Text style={{ paddingLeft: 20, fontSize: 50 }}>Contacts</Text>
 
         </View>
         <View style={{ width: "100%", height: "90%", padding: 20, backgroundColor: "#4535F260", }}>
@@ -154,7 +162,7 @@ class App extends Component {
                   placeholder="Username"
                   placeholderTextColor="black"
                   style={popup.textinput}
-                  onChangeText={text => this.setState({ emailDeRecup: text })} />
+                  onChangeText={text => this.setState({ maFriend: text })} />
               </View>
               <TouchableOpacity onPress={this.sendFriendInvite} style={{ borderRadius: 5, padding: 5, marginTop: 10, alignSelf: 'center', backgroundColor: "#60B34560" }}>
                 <View>

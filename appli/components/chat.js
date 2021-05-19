@@ -10,7 +10,6 @@ import {
 import { containers, blockacceuil, popup } from '../components/styles'
 import GLOBALS from "../components/globals.js";
 import NetInfo from '@react-native-community/netinfo';
-import {AsyncStorage} from "react-native";
 // import { RegisterEmmit, RegisterReceive } from './socket';
 
 class App extends Component {
@@ -18,8 +17,6 @@ class App extends Component {
     super(props);
     this.state = {
       roomName: '',
-      newMessagesDisplay: true,
-      date: 0,
       roomOwner: '',
       selectedOwner: '',
       members: [],
@@ -60,10 +57,9 @@ class App extends Component {
     });
     GLOBALS.SOCKET.on('messages', data => {
         //console.log("data: " + data.status + " / " + data.message);
-        if (data.status === "ok") {
+        if (data.status === "ok")
             this.state.messages = data.message;
-            this.storeDataDate();
-        } else {
+        else {
         // récup de l'archive ici: this.state.messages = les_messages_archivés
           ;
         }
@@ -82,26 +78,6 @@ class App extends Component {
       }
     });
     this.refresh();
-  }
-
-  storeDataDate = async () => {
-    try {
-      await AsyncStorage.setItem(this.state.roomName, Date.now());
-      // await AsyncStorage.setItem(this.state.roomName, JSON.stringify(this.state.messages));
-      // let result = await AsyncStorage.getItem(this.state.roomName);
-      // console.log("\nArchive: " + JSON.parse(result));
-    } catch (e) {
-      console.log(e);
-    }
-  }
-  getDataDate = async () => {
-    try {
-      const value = await AsyncStorage.getItem(this.state.roomName)
-      if(value !== null)
-        this.state.date = value;
-    } catch(e) {
-      // error reading value
-    }
   }
 
   handleChange(event) {
@@ -322,13 +298,8 @@ class App extends Component {
                 inverted
                 contentContainerStyle={{ flexDirection: 'column-reverse' }}
                 renderItem={({item}) =>
-                  <View style={{padding:5,marginBottom: 5,backgroundColor: "#D5D8DC44", shadowColor: "#303838", shadowOffset: { width: 0, height: 5 }, shadowRadius: 10, shadowOpacity: 0.4}}>
-                    {this.state.date < (parseInt(item.date)) && (
-                      <Text style={{ fontSize: 20, color: "red" }}>New Message !</Text>
-                    )}
-                    <Text style={{ fontSize: 20, color: "black" }}>{item.user} the {new Date(parseInt(item.date)).toUTCString().substring(0,new Date(parseInt(item.date)).toUTCString().length - 4)}</Text>
-                    <Text style={{ fontSize: 20, color: "black" }}>- {item.message}</Text>
-                  </View>
+                  <View style={{padding:5,marginBottom: 5,backgroundColor: "#D5D8DC44", shadowColor: "#303838", shadowOffset: { width: 0, height: 5 }, shadowRadius: 10, shadowOpacity: 0.4}}><Text style={{ fontSize: 20, color: "black" }}>{item.user} the {new Date(parseInt(item.date)).toDateString()}</Text>
+                  <Text style={{ fontSize: 20, color: "black" }}>- {item.message}</Text></View>
                 }
             />
         </View>
