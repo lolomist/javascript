@@ -224,7 +224,7 @@ io.on('connection', socket => {
       if (err)
         socket.emit('message', { status: "error", message: "Error sending the message." });
       if (result) {
-        console.log(body.members);
+        //console.log(body.members);
         BDDUpdateOneRoom({ name: body.roomName }, { members: body.members, });
       } else
       socket.emit('message', { status: "error", message: "Error sending the message." });
@@ -283,13 +283,13 @@ io.on('connection', socket => {
 
 
   socket.on("getOwner", (body) => {
-    console.log("Client asks for room owner");
+    //console.log("Client asks for room owner");
     Room.findOne({ name: body.roomName }, function (err, result) {
       if (err)
         socket.emit('getOwner', { status: "error", message: "Error searching for the room." });
       if (result) {
-        console.log(result.name);
-        console.log(result.owner);
+        //console.log(result.name);
+        //console.log(result.owner);
         socket.emit('getOwner', { status: "ok", message: result.owner });
       } else
         socket.emit('getOwner', { status: "error", message: "Error searching for the room. No room found" });
@@ -336,9 +336,9 @@ io.on('connection', socket => {
       if (err)
         socket.emit('setOwner', { status: "error", message: "Error searching for the room." });
       if (result) {
-        console.log(result.name);
+        //console.log(result.name);
         BDDUpdateOneRoom({ name: body.roomName }, { owner: body.userName });
-        console.log(result.owner);
+        //console.log(result.owner);
         socket.emit('setOwner', { status: "ok", message: "Owner changed" });
       } else
         socket.emit('setOwner', { status: "error", message: "Error searching for the room. No room found" });
