@@ -16,13 +16,12 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      popupAddfriend: false,
-      contacts: ['']
+      popupAddfriend: false
     }
     this.getContactlist = this.getContactlist.bind(this);
     this.moveToRecover = this.moveToRecover.bind(this);
     this.moveToMessages = this.moveToMessages.bind(this);
-    this.moveToContact = this.moveToContact.bind(this);
+    this.moveToContacts = this.moveToContacts.bind(this);
     this.showPopupAddFriend = this.showPopupAddFriend.bind(this);
     this.hidePopupAddFriend = this.hidePopupAddFriend.bind(this);
     this.sendFriendInvite = this.sendFriendInvite.bind(this);
@@ -34,7 +33,7 @@ class App extends Component {
       console.log("data: " + data.status + " / " + data.message);
       if (data.status === "ok") {
         console.log(data.message.toString().split(","));
-        this.state.contacts = data.message.toString().split(",");
+        global.contacts = data.message.toString().split(",");
       } else {
         // récup de l'archive ici: this.state.messages = les_messages_archivés
         ;
@@ -55,7 +54,7 @@ class App extends Component {
     this.props.navigation.navigate("Messages");
   };
 
-  moveToContact() {
+  moveToContacts() {
     this.props.navigation.navigate("Contact");
   };
 
@@ -74,7 +73,7 @@ class App extends Component {
       if (!state.isConnected) {
         alert("No connection detected, please check your connection");
       } else {
-        if (this.state.contacts[0] === "") {
+        if (global.contacts[0] === "") {
           GLOBALS.SOCKET.emit('getContacts', { email: GLOBALS.EMAIL });
         }
       }
@@ -90,8 +89,12 @@ class App extends Component {
   };
 
   sendFriendInvite() {
-    console.log("let's go");
     this.setState({ popupAddfriend: false });
+    NetInfo.fetch().then(state => {
+      if (!state.isConnected) {
+        alert("No connection detected, please check your connection");
+      }
+    })
   };
 
   render() {
@@ -99,7 +102,7 @@ class App extends Component {
 
       <View style={containers.container}>
         <View style={{ flex: 1, flexDirection: "row", width: "100%", padding: 5 }}>
-          <TouchableOpacity onPress={this.moveToContact} style={{ width: 60 }}>
+          <TouchableOpacity onPress={this.moveToContacts} style={{ width: 60 }}>
             <View style={{ borderRadius: 5, width: "100%", height: "100%", alignItems: "center", backgroundColor: "#CDCDCD" }}>
               <Image
                 style={{ height: "90%", width: "90%", alignSelf: "center" }}
@@ -108,7 +111,7 @@ class App extends Component {
             </View>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => this.moveToMessages} style={{ width: 60 }}>
+          <TouchableOpacity onPress={() => this.moveToMessages("room1")} style={{ width: 60 }}>
             <View style={{ borderRadius: 5, width: "100%", height: "100%", alignItems: "center", backgroundColor: "#CDCDCD" }}>
               <Image
                 style={{ height: "90%", width: "90%", alignSelf: "center" }}
@@ -116,35 +119,35 @@ class App extends Component {
               />
             </View>
           </TouchableOpacity>
+        </View>
+        <View style={{ width: "100%", height: "90%", padding: 20, backgroundColor: "#4535F260", }}>
 
           {this.state.popupAddfriend && (
-            <View style={{position: 'absolute', left: 10, right: 10, top: 100, backgroundColor: "white", zIndex: 90, padding: 10,}}>
-                  <Text style={{ fontSize: 25 }}>Type who you want to add.</Text>
-                  <TouchableOpacity onPress={this.hidePopupAddFriend} style={{position: 'absolute', right: 10}}>
-                    <View style={blockacceuil.logoConnection}>
-                      <Text style={blockacceuil.textLogoConnection3}>x</Text>
-                    </View>
-                  </TouchableOpacity>
-                  <View style={{ width: "100%",}}>
-                    <TextInput
-                      placeholder="Username"
-                      placeholderTextColor="black"
-                      style={popup.textinput}
-                      onChangeText={text => this.setState({ emailDeRecup: text })} />
-                  </View>
-                  <TouchableOpacity onPress={this.sendFriendInvite} style={{borderRadius: 5, padding: 5, marginTop: 10, alignSelf: 'center', backgroundColor: "#60B34560"}}>
-                    <View>
-                      <Text>Add</Text>
-                    </View>
-                  </TouchableOpacity>
+            <View style={{ position: 'absolute', left: 10, right: 10, top: 100, backgroundColor: "white", zIndex: 90, padding: 10, }}>
+              <Text style={{ fontSize: 25 }}>Type who you want to add.</Text>
+              <TouchableOpacity onPress={this.hidePopupAddFriend} style={{ position: 'absolute', right: 10 }}>
+                <View style={blockacceuil.logoConnection}>
+                  <Text style={blockacceuil.textLogoConnection3}>x</Text>
                 </View>
+              </TouchableOpacity>
+              <View style={{ width: "100%", }}>
+                <TextInput
+                  placeholder="Username"
+                  placeholderTextColor="black"
+                  style={popup.textinput}
+                  onChangeText={text => this.setState({ emailDeRecup: text })} />
+              </View>
+              <TouchableOpacity onPress={this.sendFriendInvite} style={{ borderRadius: 5, padding: 5, marginTop: 10, alignSelf: 'center', backgroundColor: "#60B34560" }}>
+                <View>
+                  <Text>Add</Text>
+                </View>
+              </TouchableOpacity>
+            </View>
           )}
 
-        </View>
 
-        <View style={{ width: "100%", height: "70%", padding: 20, backgroundColor: "red", shadowColor: "#303838", shadowOffset: { width: 0, height: 5 }, shadowRadius: 10, shadowOpacity: 0.45 }}>
           <FlatList
-            data={this.state.contacts}
+            data={global.contacts}
             keyExtractor={item => item}
             renderItem={({ item }) =>
               <Text style={{ flex: 1, textAlign: "center", fontSize: 20, color: "black" }}>{item}</Text>
