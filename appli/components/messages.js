@@ -101,6 +101,7 @@ class App extends Component {
           GLOBALS.SOCKET.emit('createRoom', { email: GLOBALS.EMAIL , roomName: this.state.roomName, members: this.state.selectContacts});
           this.state.selectContacts = [];
           this.setState({ popupContactList: false });
+          this.setState({ popupCreateRoom: false });
           GLOBALS.SOCKET.emit('getRooms', { email: GLOBALS.EMAIL });
         }
       }
