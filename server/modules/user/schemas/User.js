@@ -9,27 +9,25 @@ const UserSchema = new Schema({
     password: {type: String},
     username: {type: String},
     friends: [{type: String}],
-    rooms: [
-        {roomName: {
+    rooms: [{
+        roomName: {
             type: String,
             required: true
-        },archived: [{
+        },archived: {
             status: {
                 type: Boolean,
                 required: true
             },
-            message: [
-                {date: {
+            message: [{
+                date: {
                     type: String,
                 },user: {
                     type: String,
                 },message: {
                     type: String,
-                },
                 }
-            ],
-        }],
-        }
+            }]
+        }}
     ],
     date: {
         type: Date,

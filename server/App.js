@@ -225,7 +225,7 @@ io.on('connection', socket => {
             socket.emit('message', {status: "error", message: "Error sending the message."} );
           if (result) {
             console.log(body.members);
-            BDDUpdateOneRoom({name: body.roomName}, {members: body.members,});
+            BDDUpdateOneRoom({name: body.roomName}, {members: body.members});
            }})
     })
 
@@ -329,6 +329,76 @@ io.on('connection', socket => {
         socket.emit('getMembers', { status: "ok", message: result.members });
       else
         socket.emit('getMembers', { status: "error", message: "No Room to get messages from." });
+    })
+  })
+
+
+
+
+  
+  socket.on("iQuit", (body) => {
+    console.log("Client " + body.email + " asks to leave the room room: " + body.roomName + ", goodbye :c");
+    User.findOne({ email: body.email }, function (err, result) {
+      if (err)
+        socket.emit('iQuit', { status: "error", message: "Error while identifying user who asks messages." });
+      if (result) {
+        let rooms = result.rooms;
+        for (const [key, value] of Object.entries(rooms)) {
+          if (value["roomName"] == body.roomName)
+            delete rooms[key]
+        }
+        BDDUpdateOneUser({ email: body.email }, { rooms: rooms.filter(element => element !== undefined) });
+      } else
+        socket.emit('iQuit', { status: "error", message: "No user with this email." });
+    })
+    Room.findOne({ name: body.roomName }, function (err, result) {
+      if (err)
+        socket.emit('iQuit', { status: "error", message: "Error searching for the room." });
+      if (result) {
+        let newMembers = result.members;
+        newMembers.splice(newMembers.indexOf(body.username), 1)
+        BDDUpdateOneRoom({name: body.roomName}, {members: newMembers});
+        BDDUpdateOneRoom({name: body.roomName}, {owner: newMembers[0]});
+        socket.emit('iQuit', { status: "ok", message: "Bye Bye" });
+      } else
+        socket.emit('iQuit', { status: "error", message: "No Room to get messages from." });
+    })
+  })
+
+
+
+
+
+  socket.on("archive", (body) => {
+    let messages = [{}];
+    console.log("Client " + body.email + " asks to leave the room room: " + body.roomName + ", goodbye :c");
+    Room.findOne({ name: body.roomName }, function (err, result) {
+      if (err)
+        socket.emit('archive', { status: "error", message: "Error searching for the room." });
+      if (result) {
+        let newMembers = result.members;
+        newMembers.splice(newMembers.indexOf(body.username), 1)
+        BDDUpdateOneRoom({name: body.roomName}, {members: newMembers});
+        BDDUpdateOneRoom({name: body.roomName}, {owner: newMembers[0]});
+        messages = result.messages;
+      } else
+        socket.emit('archive', { status: "error", message: "No Room to get messages from." });
+    })
+    User.findOne({ email: body.email }, function (err, result) {
+      if (err)
+        socket.emit('archive', { status: "error", message: "Error while identifying user who asks messages." });
+      if (result) {
+        let rooms = result.rooms;
+        for (const [key, value] of Object.entries(rooms)) {
+          if (value["roomName"] == body.roomName) {
+            rooms[key]["archived"]["status"] = true;
+            rooms[key]["archived"]["message"] = messages;
+          }
+        }
+        BDDUpdateOneUser({ email: body.email }, { rooms: rooms.filter(element => element !== undefined) });
+        socket.emit('archive', { status: "ok", message: "Bye Bye" });
+      } else
+        socket.emit('archive', { status: "error", message: "No user with this email." });
     })
   })
 });

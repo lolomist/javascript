@@ -28,7 +28,8 @@ class App extends Component {
       message: '',
       messages: [{}],
       popupOwnerSettings: false,
-      popupMemberSettings: false
+      popupMemberSettings: false,
+      popupQuitRoom: false
     }
     this.sendMessage = this.sendMessage.bind(this);
     this.getRoomMessages = this.getRoomMessages.bind(this);
@@ -46,6 +47,10 @@ class App extends Component {
     this.renderItemMember = this.renderItemMember.bind(this);
     this.moveToRecover = this.moveToRecover.bind(this);
     this.addContacts = this.addContacts.bind(this);
+    this.quitChatRoom = this.quitChatRoom.bind(this);
+    this.archiveChatRoom = this.archiveChatRoom.bind(this);
+    this.showQuitChatRoomPopup = this.showQuitChatRoomPopup.bind(this);
+    this.hideQuitChatRoomPopup = this.hideQuitChatRoomPopup.bind(this);
   }
 
   componentWillUnmount() {
@@ -113,7 +118,7 @@ class App extends Component {
 
   refresh() {
     this.getRoomOwner();
-    this.getRoomMessages();
+    //this.getRoomMessages();
     this.intervalID = setTimeout(this.refresh.bind(this), 1000);
     this.setState({ state: this.state });
   }
@@ -158,7 +163,6 @@ class App extends Component {
       if (!state.isConnected) {
         alert("No connection detected, please check your connection");
       } else {
-        console.log(this.state.members);
         GLOBALS.SOCKET.emit('getMembers', { email: GLOBALS.EMAIL, roomName: this.state.roomName });
       }
     });
@@ -269,6 +273,23 @@ class App extends Component {
     });
   };
 
+  quitChatRoom() {
+    GLOBALS.SOCKET.emit('iQuit', { email: GLOBALS.EMAIL, username: GLOBALS.USERNAME, roomName: this.state.roomName });
+    this.props.navigation.goBack();
+  };
+
+  archiveChatRoom() {
+    GLOBALS.SOCKET.emit('archive', { email: GLOBALS.EMAIL, roomName: this.state.roomName })
+    this.props.navigation.goBack();
+  };
+
+  showQuitChatRoomPopup() {
+    this.setState({ popupQuitRoom: true });
+  };
+  hideQuitChatRoomPopup() {
+    this.setState({ popupQuitRoom: false });
+  };
+
   renderItemMember(item) {
     const backgroundColor = this.state.selectedMember.includes(item) ? "#5ADE7EF0" : "#5ADED8F0";
     const color = this.state.selectedMember.includes(item) ? '#DEB45A' : 'black';
@@ -312,6 +333,14 @@ class App extends Component {
                   </View>
               </TouchableOpacity>
             )}
+            <TouchableOpacity onPress={this.showQuitChatRoomPopup} style={{flexDirection: "row", backgroundColor: "white", height: "100%", width: "17%"}}>
+                <View style={{borderRadius: 5, borderColor: 'black', width: "100%", height: "100%", alignItems: "center", backgroundColor: "#CDCDCD"}}>
+                    <Image
+                        style={{marginTop: "17%", marginBottom: "17%", height: "60%", width: "70%", alignSelf: "center"}}
+                        source={require('../assets/icon-quit.png')}
+                    />
+                </View>
+            </TouchableOpacity>
         </View>
 
         <View style={{width: "100%", height: "70%", padding: 20, backgroundColor: "white", shadowColor: "#303838", shadowOffset: { width: 0, height: 5 }, shadowRadius: 10, shadowOpacity: 0.45}}>
@@ -415,6 +444,30 @@ class App extends Component {
                 <View>
                   <TouchableOpacity onPress={this.addContacts} style={{width: "100%", height: 50, padding: 5, flexDirection: "row", justifyContent:"flex-end", alignItems: "center", marginTop:30, backgroundColor: "grey", borderRadius: 30}}>
                     <Text style={{ flex: 1, textAlign: "center", fontSize: 20, color: "black" }}>ADD</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </View>
+        )}
+        {this.state.popupQuitRoom && (
+          <View style={popup.popup}>
+            <View style={popup.popup2}>
+              <View style={containers.container}>
+                <View style={{width:"100%",alignItems:"center", backgroundColor: "black"}}>
+                  <TouchableOpacity onPress={this.hideQuitChatRoomPopup} style={blockacceuil.blockRecup2}>
+                    <View style={blockacceuil.logoConnection}>
+                      <Text style={blockacceuil.textLogoConnection3}>x</Text>
+                    </View>
+                  </TouchableOpacity>
+                </View>
+                  <Text style={{ fontSize: 25}}>Do you want to Quit or Archive this room?</Text>
+                <View>
+                  <TouchableOpacity onPress={this.quitChatRoom} style={{width: "100%", height: 50, padding: 5, flexDirection: "row", justifyContent:"flex-end", alignItems: "center", marginTop:30, backgroundColor: "red", borderRadius: 30}}>
+                    <Text style={{ flex: 1, textAlign: "center", fontSize: 20, color: "black" }}>Quit</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={this.archiveChatRoom} style={{width: "100%", height: 50, padding: 5, flexDirection: "row", justifyContent:"flex-end", alignItems: "center", marginTop:30, backgroundColor: "orange", borderRadius: 30}}>
+                    <Text style={{ flex: 1, textAlign: "center", fontSize: 20, color: "black" }}>Archive</Text>
                   </TouchableOpacity>
                 </View>
               </View>
