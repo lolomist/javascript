@@ -252,10 +252,18 @@ io.on('connection', socket => {
         User.findOne({ email: body.email }, function (err, res) {
           if (res) {
             username = res.username.toString();
-            if (res.pending != '')
-              BDDUpdateOneUser({ username: body.contact }, { pending: (username + "," + res.pending) });
-            else
-              BDDUpdateOneUser({ username: body.contact }, { pending: username });
+            let contacts1 = result.friends;
+            let contacts2 = res.friends;
+            if (!contacts1.includes(res.username))
+              contacts1.push(res.username);
+            if (!contacts2.includes(result.username))
+              contacts2.push(result.username);
+            BDDUpdateOneUser({ username: result.username }, { friends: contacts1 });
+            BDDUpdateOneUser({ username: res.username }, { friends: contacts2 });
+            // if (res.pending != '')
+            //   BDDUpdateOneUser({ username: body.contact }, { pending: (username + "," + res.pending) });
+            // else
+            //   BDDUpdateOneUser({ username: body.contact }, { pending: username });
           }
         })
       }
