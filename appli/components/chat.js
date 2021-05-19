@@ -54,6 +54,7 @@ class App extends Component {
 
   componentDidMount() {
     this.state.roomName = this.props.navigation.getParam('room', 'room1');
+    this.getDataDate();
     GLOBALS.SOCKET.on('getOwner', data => {
       if (data.status === "ok")
           this.state.roomOwner = data.message.toString();
@@ -86,10 +87,7 @@ class App extends Component {
 
   storeDataDate = async () => {
     try {
-      await AsyncStorage.setItem(this.state.roomName, Date.now());
-      // await AsyncStorage.setItem(this.state.roomName, JSON.stringify(this.state.messages));
-      // let result = await AsyncStorage.getItem(this.state.roomName);
-      // console.log("\nArchive: " + JSON.parse(result));
+      await AsyncStorage.setItem(this.state.roomName, (Date.now()).toString());
     } catch (e) {
       console.log(e);
     }
@@ -97,8 +95,9 @@ class App extends Component {
   getDataDate = async () => {
     try {
       const value = await AsyncStorage.getItem(this.state.roomName)
+      console.log("Getting: " + value);
       if(value !== null)
-        this.state.date = value;
+        this.state.date = parseInt(value);
     } catch(e) {
       // error reading value
     }
