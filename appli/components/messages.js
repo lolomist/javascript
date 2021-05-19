@@ -18,7 +18,6 @@ class App extends Component {
     this.state = {
       popupCreateRoom: false,
       popupContactList: false,
-      contacts: [],
       selectContacts: [],
       rooms: [],
       roomName: ""
@@ -40,15 +39,6 @@ class App extends Component {
       console.log("data: " + data.status + " / " + data.message);
       if (data.status === "ok") {
         this.state.rooms = data.message.toString().split(",");
-      } else {
-        // is not ok
-        ;
-      }
-    });
-    GLOBALS.SOCKET.on('getContacts', data => {
-      console.log("data: " + data.status + " / " + data.message);
-      if (data.status === "ok") {
-        this.state.contacts = data.message.toString().split(",");
       } else {
         // is not ok
         ;
@@ -136,12 +126,6 @@ class App extends Component {
 
 
   showPopupContactList() {
-    NetInfo.fetch().then(state => {
-      if (!state.isConnected)
-        alert("No connection detected, please check your connection");
-      else
-        GLOBALS.SOCKET.emit('getContacts', { email: GLOBALS.EMAIL});
-    });
     this.setState({ popupContactList: true });
   };
 
@@ -216,7 +200,7 @@ class App extends Component {
                 </View>
                 <View style={{width: "100%", height: "70%", padding: 20, backgroundColor: "red", shadowColor: "#303838", shadowOffset: { width: 0, height: 5 }, shadowRadius: 10, shadowOpacity: 0.45}}>
                 <FlatList 
-                    data={this.state.contacts}
+                    data={GLOBALS.CONTACTS}
                     keyExtractor={item => item}
                     renderItem={({ item }) => this.renderItemContactList(item)}
                   />

@@ -55,7 +55,6 @@ class App extends Component {
       if (data.status === "ok")
           this.state.roomOwner = data.message.toString();
     });
-    GLOBALS.CONTACTS = ["valentinw", "arthurq", "antoine"];
     GLOBALS.SOCKET.on('messages', data => {
         //console.log("data: " + data.status + " / " + data.message);
         if (data.status === "ok")

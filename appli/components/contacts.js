@@ -33,7 +33,7 @@ class App extends Component {
       console.log("data: " + data.status + " / " + data.message);
       if (data.status === "ok") {
         console.log(data.message.toString().split(","));
-        global.contacts = data.message.toString().split(",");
+        GLOBALS.CONTACTS = data.message.toString().split(",");
       } else {
         // récup de l'archive ici: this.state.messages = les_messages_archivés
         ;
@@ -73,7 +73,7 @@ class App extends Component {
       if (!state.isConnected) {
         alert("No connection detected, please check your connection");
       } else {
-        if (global.contacts[0] === "") {
+        if (GLOBALS.CONTACTS[0] === "") {
           GLOBALS.SOCKET.emit('getContacts', { email: GLOBALS.EMAIL });
         }
       }
@@ -147,7 +147,7 @@ class App extends Component {
 
 
           <FlatList
-            data={global.contacts}
+            data={GLOBALS.CONTACTS}
             keyExtractor={item => item}
             renderItem={({ item }) =>
               <Text style={{ flex: 1, textAlign: "center", fontSize: 20, color: "black" }}>{item}</Text>
