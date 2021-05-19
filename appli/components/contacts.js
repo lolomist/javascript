@@ -27,6 +27,10 @@ class App extends Component {
     this.sendFriendInvite = this.sendFriendInvite.bind(this);
   }
 
+  componentWillUnmount() {
+    clearInterval(this.intervalID);
+  }
+
   componentDidMount() {
     console.log("contact");
     GLOBALS.SOCKET.on('getContacts', data => {
