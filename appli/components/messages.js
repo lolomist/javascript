@@ -157,7 +157,7 @@ class App extends Component {
             </View>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => this.moveToRoom("room1")} style={{ width: 60 }}>
+          <TouchableOpacity style={{ width: 60 }}>
             <View style={{ borderRadius: 5, width: "100%", height: "100%", alignItems: "center", backgroundColor: "#8D8D8D" }}>
               <Image
                 style={{ height: "90%", width: "90%", alignSelf: "center" }}

@@ -341,7 +341,7 @@ class App extends Component {
                 inverted
                 contentContainerStyle={{ flexDirection: 'column-reverse' }}
                 renderItem={({item}) =>
-                  <View style={{padding:5,marginBottom: 5,backgroundColor: "#D5D8DC44", shadowColor: "#303838", shadowOffset: { width: 0, height: 5 }, shadowRadius: 10, shadowOpacity: 0.4}}><Text style={{ fontSize: 20, color: "black" }}>{item.user} the {new Date(parseInt(item.date)).toDateString()}</Text>
+                  <View style={{padding:5,marginBottom: 5,backgroundColor: "#D5D8DC44", shadowColor: "#303838", shadowOffset: { width: 0, height: 5 }, shadowRadius: 10, shadowOpacity: 0.4}}><Text style={{ fontSize: 20, color: "black" }}>{item.user} the {new Date(parseInt(item.date)).toUTCString().substring(0,new Date(parseInt(item.date)).toUTCString().length - 4)}</Text>
                   <Text style={{ fontSize: 20, color: "black" }}>- {item.message}</Text></View>
                 }
             />
