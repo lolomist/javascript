@@ -51,7 +51,6 @@ class App extends Component {
 
   componentDidMount() {
     this.state.roomName = this.props.navigation.getParam('room', 'room1');
-    this.getDataDate();
     GLOBALS.SOCKET.on('getOwner', data => {
       if (data.status === "ok")
           this.state.roomOwner = data.message.toString();
@@ -74,6 +73,10 @@ class App extends Component {
             if (!this.state.members.includes(element) && element != "")
             this.state.contacts.push(element);
           });
+          this.state.goodOwner = this.state.members;
+          console.log(this.state.goodOwner);
+          this.state.goodOwner.splice(this.state.goodOwner.indexOf(GLOBALS.USERNAME));
+          console.log(this.state.goodOwner);
       } else {
         ;
       }
@@ -344,7 +347,7 @@ class App extends Component {
                 </View>
                 <View style={{width: "100%", height: "70%", padding: 20, backgroundColor: "red", shadowColor: "#303838", shadowOffset: { width: 0, height: 5 }, shadowRadius: 10, shadowOpacity: 0.45}}>
                   <FlatList 
-                    data={this.state.members}
+                    data={this.state.goodOwner}
                     keyExtractor={item => item}
                     renderItem={({ item }) => this.renderItemOwners(item)}
                   />
