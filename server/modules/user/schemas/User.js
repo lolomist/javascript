@@ -20,6 +20,10 @@ const UserSchema = new Schema({
     verified: {
         type: Boolean,
         default: false
+    },
+    pending: {
+        type: String,
+        default:true
     }
 })
 

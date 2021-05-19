@@ -16,7 +16,12 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      popupAddfriend: false
+      popupAddfriend: false,
+      email: '',
+      alertMessage: '',
+      condition: true,
+      emailError: false,
+      emailErrorMessage: ''
     }
     this.getContactlist = this.getContactlist.bind(this);
     this.moveToRecover = this.moveToRecover.bind(this);
@@ -89,13 +94,19 @@ class App extends Component {
   };
 
   sendFriendInvite() {
-    this.setState({ popupAddfriend: false });
-    NetInfo.fetch().then(state => {
-      if (!state.isConnected) {
-        alert("No connection detected, please check your connection");
+    GLOBALS.SOCKET.on('sendInvite', data => {
+      console.log("data: " + data.status + " / " + data.message);
+      if (data.status === "ok") {
+        console.log(data.message.toString().split(","));
+        GLOBALS.CONTACTS = data.message.toString().split(",");
+      } else {
+        // récup de l'archive ici: this.state.messages = les_messages_archivés
+        ;
       }
-    })
-  };
+    });
+  this.setState({ popupAddfriend: false });
+};
+
 
   render() {
     return (
@@ -103,7 +114,7 @@ class App extends Component {
       <View style={containers.container}>
         <View style={{ flex: 1, flexDirection: "row", width: "100%", padding: 5 }}>
           <TouchableOpacity onPress={this.moveToContacts} style={{ width: 60 }}>
-            <View style={{ borderRadius: 5, width: "100%", height: "100%", alignItems: "center", backgroundColor: "#CDCDCD" }}>
+            <View style={{ borderRadius: 5, width: "100%", height: "100%", alignItems: "center", backgroundColor: "#8D8D8D" }}>
               <Image
                 style={{ height: "90%", width: "90%", alignSelf: "center" }}
                 source={require('../assets/icon-contacts.png')}
@@ -119,6 +130,8 @@ class App extends Component {
               />
             </View>
           </TouchableOpacity>
+          <Text style={{paddingLeft: 20,fontSize: 50}}>Contacts</Text>
+
         </View>
         <View style={{ width: "100%", height: "90%", padding: 20, backgroundColor: "#4535F260", }}>
 
