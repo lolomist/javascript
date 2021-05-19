@@ -21,13 +21,15 @@ class App extends Component {
     }
     this.getContactlist = this.getContactlist.bind(this);
     this.moveToRecover = this.moveToRecover.bind(this);
-    this.moveMessages = this.moveMessages.bind(this);
+    this.moveToMessages = this.moveToMessages.bind(this);
+    this.moveToContact = this.moveToContact.bind(this);
     this.showPopupAddFriend = this.showPopupAddFriend.bind(this);
     this.hidePopupAddFriend = this.hidePopupAddFriend.bind(this);
-    this.closePopupAddFriend = this.closePopupAddFriend.bind(this);
+    this.sendFriendInvite = this.sendFriendInvite.bind(this);
   }
 
   componentDidMount() {
+    console.log("contact");
     GLOBALS.SOCKET.on('getContacts', data => {
       console.log("data: " + data.status + " / " + data.message);
       if (data.status === "ok") {
@@ -49,8 +51,12 @@ class App extends Component {
     this.props.navigation.navigate("Connection");
   };
 
-  moveMessages() {
+  moveToMessages() {
     this.props.navigation.navigate("Messages");
+  };
+
+  moveToContact() {
+    this.props.navigation.navigate("Contact");
   };
 
   refresh() {
@@ -76,85 +82,65 @@ class App extends Component {
   };
 
   showPopupAddFriend() {
-    console.log("showed");
     this.setState({ popupAddfriend: true });
   };
 
   hidePopupAddFriend() {
-    console.log("hidded");
     this.setState({ popupAddfriend: false });
   };
 
-  closePopupAddFriend() {
-    console.log("closed");
-    NetInfo.fetch().then(state => {
-
-    });
+  sendFriendInvite() {
+    console.log("let's go");
+    this.setState({ popupAddfriend: false });
   };
 
   render() {
     return (
 
       <View style={containers.container}>
-        <View style={{ flex: 1, flexDirection: "row", width: "100%", height: "15%", padding: 30 }}>
-          <TouchableOpacity style={{ flexDirection: "row", backgroundColor: "white", height: "100%", width: "17%" }}>
-            <View style={{ borderRadius: 5, borderColor: 'black', width: "100%", height: "100%", alignItems: "center", backgroundColor: "#CDCDCD" }}>
+        <View style={{ flex: 1, flexDirection: "row", width: "100%", padding: 5 }}>
+          <TouchableOpacity onPress={this.moveToContact} style={{ width: 60 }}>
+            <View style={{ borderRadius: 5, width: "100%", height: "100%", alignItems: "center", backgroundColor: "#CDCDCD" }}>
               <Image
-                style={{ marginTop: "17%", marginBottom: "17%", height: "60%", width: "70%", alignSelf: "center" }}
+                style={{ height: "90%", width: "90%", alignSelf: "center" }}
                 source={require('../assets/icon-contacts.png')}
               />
             </View>
           </TouchableOpacity>
 
-          <TouchableOpacity style={{ flexDirection: "row", backgroundColor: "white", height: "100%", width: "17%" }} onPress={this.moveMessages}>
-            <View style={{ borderRadius: 5, borderColor: 'black', width: "100%", height: "100%", alignItems: "center", backgroundColor: "#CDCDCD" }}>
+          <TouchableOpacity onPress={() => this.moveToMessages} style={{ width: 60 }}>
+            <View style={{ borderRadius: 5, width: "100%", height: "100%", alignItems: "center", backgroundColor: "#CDCDCD" }}>
               <Image
-                style={{ marginTop: "17%", marginBottom: "17%", height: "60%", width: "70%", alignSelf: "center" }}
+                style={{ height: "90%", width: "90%", alignSelf: "center" }}
                 source={require('../assets/logo.png')}
               />
             </View>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={this.showPopupAddFriend} style={{ flexDirection: "row", backgroundColor: "white", height: "100%", width: "17%" }}>
-            <View style={{ borderRadius: 5, borderColor: 'black', width: "100%", height: "100%", alignItems: "center", backgroundColor: "#CDCDCD" }}>
-              <Image
-                style={{ marginTop: "17%", marginBottom: "17%", height: "60%", width: "70%", alignSelf: "center" }}
-                source={require('../assets/icon-add-contact.png')}
-              />
-            </View>
-          </TouchableOpacity>
-
-          <View>
-            <View style={popup.popup}>
-              <View style={popup.popup2}>
-                <View style={containers.container}>
-                  <Text style={{ fontSize: 25 }}>Veuillez renseigner votre nouvel ami.</Text>
-                  <View style={{ width: "100%", top: "30%" }}>
+          {this.state.popupAddfriend && (
+            <View style={{position: 'absolute', left: 10, right: 10, top: 100, backgroundColor: "white", zIndex: 90, padding: 10,}}>
+                  <Text style={{ fontSize: 25 }}>Type who you want to add.</Text>
+                  <TouchableOpacity onPress={this.hidePopupAddFriend} style={{position: 'absolute', right: 10}}>
+                    <View style={blockacceuil.logoConnection}>
+                      <Text style={blockacceuil.textLogoConnection3}>x</Text>
+                    </View>
+                  </TouchableOpacity>
+                  <View style={{ width: "100%",}}>
                     <TextInput
                       placeholder="Username"
                       placeholderTextColor="black"
                       style={popup.textinput}
                       onChangeText={text => this.setState({ emailDeRecup: text })} />
                   </View>
-
-                  <View style={{ width: "100%", alignItems: "center", top: "50%" }}>
-                    <TouchableOpacity onPress={this.closePopupAddFriend} style={blockacceuil.blockConnection2}>
-                      <View style={blockacceuil.logoConnection}>
-                        <Text style={blockacceuil.textLogoConnection2}>?</Text>
-                      </View>
-                      <Text style={blockacceuil.textConnection}>Add friend</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={this.hidePopupAddFriend} style={blockacceuil.blockRecup2}>
-                      <View style={blockacceuil.logoConnection}>
-                        <Text style={blockacceuil.textLogoConnection3}>x</Text>
-                      </View>
-                    </TouchableOpacity>
-                  </View>
+                  <TouchableOpacity onPress={this.sendFriendInvite} style={{borderRadius: 5, padding: 5, marginTop: 10, alignSelf: 'center', backgroundColor: "#60B34560"}}>
+                    <View>
+                      <Text>Add</Text>
+                    </View>
+                  </TouchableOpacity>
                 </View>
-              </View>
-            </View>
-          </View>        </View>
+          )}
 
+        </View>
 
         <View style={{ width: "100%", height: "70%", padding: 20, backgroundColor: "red", shadowColor: "#303838", shadowOffset: { width: 0, height: 5 }, shadowRadius: 10, shadowOpacity: 0.45 }}>
           <FlatList
@@ -164,6 +150,15 @@ class App extends Component {
               <Text style={{ flex: 1, textAlign: "center", fontSize: 20, color: "black" }}>{item}</Text>
             }
           />
+
+          <TouchableOpacity onPress={this.showPopupAddFriend} style={{ position: 'absolute', right: 20, bottom: 20, width: 60, }}>
+            <View>
+              <Image
+                style={{ width: 60, height: 60, }}
+                source={require('../assets/icon-add-contact.png')}
+              />
+            </View>
+          </TouchableOpacity>
         </View>
       </View>
 
