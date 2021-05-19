@@ -233,6 +233,21 @@ io.on('connection', socket => {
 
 
 
+    socket.on("addContacts", (body) => {
+      console.log("Client add member in: " + body.contact);
+      User.findOne({ name: body.contact }, function(err, result) {
+          if (err)
+            socket.emit('message', {status: "error", message: "Error this user donsen't exist."} );
+          if (result) {
+            console.log(body.contact);
+            BDDUpdateOneUser({pending: body.name});
+           }})
+    })
+
+
+
+
+
   socket.on("messages", (body) => {
     let username = '';
     console.log("Client " + body.email + " asks for messages of room: " + body.roomName);

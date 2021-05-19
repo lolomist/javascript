@@ -98,17 +98,19 @@ class App extends Component {
   };
 
   sendFriendInvite() {
-    GLOBALS.SOCKET.on('sendInvite', data => {
-      console.log("data: " + data.status + " / " + data.message);
-      if (data.status === "ok") {
-        console.log(data.message.toString().split(","));
-        GLOBALS.CONTACTS = data.message.toString().split(",");
+    NetInfo.fetch().then(state => {
+      if (!state.isConnected) {
+        alert("No connection detected, please check your connection");
       } else {
-        // récup de l'archive ici: this.state.messages = les_messages_archivés
-        ;
+        console.log("Send pending request :" + this.state.selectedMember.concat(this.state.members));
+        if (this.state.selectedMember[0] != "") {
+          GLOBALS.SOCKET.emit('addContacts', { members: this.state.selectedMember.concat(this.state.members)});
+       
+          console.log(this.state.selectedMember);
+          this.setState({ popupAddfriend: false });
+        }
       }
     });
-  this.setState({ popupAddfriend: false });
 };
 
 
