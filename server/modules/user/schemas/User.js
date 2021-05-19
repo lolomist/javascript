@@ -45,7 +45,6 @@ const UserSchema = new Schema({
     },
     pending: {
         type: String,
-        default:true
     }
 })
 
