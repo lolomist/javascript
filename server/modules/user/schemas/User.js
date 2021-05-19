@@ -21,19 +21,14 @@ const UserSchema = new Schema({
             message: [
                 {date: {
                     type: String,
-                    required: true
                 },user: {
                     type: String,
-                    required: true
                 },message: {
                     type: String,
-                    required: true
                 },
-                required: true
                 }
             ],
         }],
-        default: null
         }
     ],
     date: {
