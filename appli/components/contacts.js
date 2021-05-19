@@ -92,7 +92,7 @@ class App extends Component {
       if (!state.isConnected) {
         alert("No connection detected, please check your connection");
       } else {
-        if (GLOBALS.CONTACTS[0] === "") {
+        if (!GLOBALS.CONTACTS[0]) {
           GLOBALS.SOCKET.emit('getContacts', { email: GLOBALS.EMAIL });
         }
       }
