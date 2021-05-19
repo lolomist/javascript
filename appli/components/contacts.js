@@ -37,11 +37,11 @@ class App extends Component {
   }
 
   componentDidMount() {
-    console.log("contact");
+    //console.log("contact");
     GLOBALS.SOCKET.on('getContacts', data => {
-      console.log("data: " + data.status + " / " + data.message);
+      //console.log("data: " + data.status + " / " + data.message);
       if (data.status === "ok") {
-        console.log(data.message.toString().split(","));
+        //console.log(data.message.toString().split(","));
         GLOBALS.CONTACTS = data.message.toString().split(",");
       } else {
         // récup de l'archive ici: this.state.messages = les_messages_archivés
@@ -99,9 +99,9 @@ class App extends Component {
 
   sendFriendInvite() {
     GLOBALS.SOCKET.on('sendInvite', data => {
-      console.log("data: " + data.status + " / " + data.message);
+      //console.log("data: " + data.status + " / " + data.message);
       if (data.status === "ok") {
-        console.log(data.message.toString().split(","));
+        //console.log(data.message.toString().split(","));
         GLOBALS.CONTACTS = data.message.toString().split(",");
       } else {
         // récup de l'archive ici: this.state.messages = les_messages_archivés

@@ -32,7 +32,7 @@ class App extends Component {
 
   //Fontion pour enregistrer un compte dans la BDD
   validateReset() {
-    console.log(this.state.condition);
+    //console.log(this.state.condition);
     NetInfo.fetch().then(state => {
         if (!state.isConnected) {
           alert("No connection detected, please check your connection");
@@ -69,12 +69,12 @@ class App extends Component {
             return ("Invalid password");
           }
 
-          console.log("ICI")
+          //console.log("ICI")
 
           // RegisterEmmit(this.state.name, this.state.firstname, this.state.email, this.state.password);
           GLOBALS.SOCKET.emit('reset', { email: GLOBALS.EMAIL, password: this.state.password });
           GLOBALS.SOCKET.on('reset', data => {
-            console.log("data: " + data.status + " / " + data.message);
+            //console.log("data: " + data.status + " / " + data.message);
             if (data.status === "ok") {
                 alert("password reseted succesfuly!");
                 this.props.navigation.navigate("Connection");

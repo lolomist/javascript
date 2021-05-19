@@ -91,12 +91,12 @@ export default class App extends React.Component {
 
         GLOBALS.SOCKET.emit('login', { email: this.state.email, password: this.state.password });
         GLOBALS.SOCKET.on('login', data => {
-          console.log("data: " + data.status + " / " + data.message);
+          //console.log("data: " + data.status + " / " + data.message);
           if (data.status === "ok") {
             console.log("Connected!");
             this.storeDataEmail(this.state.email);
             this.storeDataPassword(this.state.password);
-            console.log("Going to the chat");
+            //console.log("Going to the chat");
             GLOBALS.USERNAME = data.message.toString();
             //this.props.navigation.navigate("Chat", { room: 'room1' });
             this.props.navigation.navigate("Contact");
