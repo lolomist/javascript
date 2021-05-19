@@ -43,9 +43,6 @@ class App extends Component {
       console.log("data: " + data.status + " / " + data.message);
       if (data.status === "ok") {
         this.state.rooms = data.message.toString().split(",");
-      } else {
-        // is not ok
-        ;
       }
     });
     this.refresh();

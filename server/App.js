@@ -203,7 +203,7 @@ io.on('connection', socket => {
             //console.log("messages of " + body.roomName + " : " + body.message);
             messages.push(message);
             //console.log("messages of " + body.roomName + " : " + body.message);
-            BDDUpdateOneRoom({ name: body.roomName }, { messages: messages});
+            BDDUpdateOneRoom({ name: body.roomName }, { messages: messages });
             socket.emit('message', { status: "ok", message: "Message sent." });
           }
           else
@@ -227,7 +227,7 @@ io.on('connection', socket => {
         //console.log(body.members);
         BDDUpdateOneRoom({ name: body.roomName }, { members: body.members, });
       } else
-      socket.emit('message', { status: "error", message: "Error sending the message." });
+        socket.emit('message', { status: "error", message: "Error sending the message." });
     })
   })
 
@@ -244,7 +244,10 @@ io.on('connection', socket => {
         User.findOne({ email: body.email }, function (err, res) {
           if (res) {
             username = res.username.toString();
-            BDDUpdateOneUser({ username: body.contact }, { pending: username });
+            if (res.pending != '')
+              BDDUpdateOneUser({ username: body.contact }, { pending: (username + "," + res.pending) });
+            else
+              BDDUpdateOneUser({ username: body.contact }, { pending: username });
           }
         })
       }
@@ -311,10 +314,43 @@ io.on('connection', socket => {
         socket.emit('getContacts', { status: "error", message: "No user with this email." });
     })
   });
-  
-  
-  
-  
+
+
+
+
+  socket.on("createRoom", (body) => {
+    console.log("Client add member in: " + body.contact);
+    User.findOne({ username: body.contact }, function (err, result) {
+      if (err)
+        socket.emit('createRoom', { status: "error", message: "Error this user doesn't exist." });
+      if (result) {
+        BDDUpdateOneUser();
+      }
+      else
+        socket.emit('createRoom', { status: "error", message: "Error this user doesn't exist." });
+    })
+  })
+
+
+
+
+
+  socket.on("getRooms", (body) => {
+    //console.log("Client " + body.email + " asks for his friends: " + body.friends);
+    User.findOne({ email: body.email }, function (err, result) {
+      if (err)
+        socket.emit('getRooms', { status: "error", message: "Error while identifying user who asks friends." });
+      if (result) {
+        //some truc
+        socket.emit('getRooms', { status: "ok", message: result.friends });
+      } else
+        socket.emit('getRooms', { status: "error", message: "No user with this email." });
+    })
+  });
+
+
+
+
   socket.on("getPendings", (body) => {
     //console.log("Client " + body.email + " asks for his friends: " + body.friends);
     User.findOne({ email: body.pending }, function (err, result) {
