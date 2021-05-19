@@ -52,7 +52,7 @@ class App extends Component {
   }
 
   componentWillUnmount() {
-    clearInterval(this.intervalID);
+    
   }
 
   componentDidMount() {
