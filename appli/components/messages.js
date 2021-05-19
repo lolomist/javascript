@@ -56,7 +56,7 @@ class App extends Component {
   }
 
   moveToContacts() {
-    this.props.navigation.navigate("contacts");
+    this.props.navigation.navigate("Contact");
   };
 
   moveToRoom(selectedRoom) {
@@ -160,15 +160,16 @@ class App extends Component {
           </TouchableOpacity>
 
           <TouchableOpacity onPress={ () => this.moveToRoom("room1")} style={{width: 60 }}>
-            <View style={{ borderRadius: 5, width: "100%", height: "100%", alignItems: "center", backgroundColor: "#CDCDCD" }}>
+            <View style={{ borderRadius: 5, width: "100%", height: "100%", alignItems: "center", backgroundColor: "#8D8D8D" }}>
               <Image
                 style={{height: "90%", width: "90%", alignSelf: "center" }}
                 source={require('../assets/logo.png')}
               />
             </View>
           </TouchableOpacity>
-          </View>
-          <View style={{ width: "100%", height: "90%", padding: 20, backgroundColor: "#4535F260",}}>
+          <Text style={{paddingLeft: 20,fontSize: 50}}>Room</Text>
+        </View>
+        <View style={{ width: "100%", height: "90%", padding: 20, backgroundColor: "#4535F260",}}>
           {this.state.popupCreateRoom && (
                 <View style={{position: 'absolute', left: 10, right: 10, top: 10, backgroundColor: "white", zIndex: 90, padding: 10,}}>
                   <Text style={{ fontSize: 25 }}>create a room</Text>
