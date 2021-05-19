@@ -6,6 +6,7 @@ import {
   TextInput,
   Image,
   FlatList,
+  Alert,
 } from 'react-native';
 import { containers, blockacceuil, popup } from '../components/styles'
 import GLOBALS from "../components/globals.js";
@@ -21,9 +22,13 @@ class App extends Component {
       alertMessage: '',
       condition: true,
       emailError: false,
-      emailErrorMessage: ''
+      maFriend: '',
+      emailErrorMessage: '',
+      pendingList: []
     }
+    this.alertPresent = false;
     this.getContactlist = this.getContactlist.bind(this);
+    this.getPendingList = this.getPendingList.bind(this);
     this.moveToRecover = this.moveToRecover.bind(this);
     this.moveToMessages = this.moveToMessages.bind(this);
     this.moveToContacts = this.moveToContacts.bind(this);
@@ -37,17 +42,21 @@ class App extends Component {
   }
 
   componentDidMount() {
-    console.log("contact");
+    //console.log("contact");
     GLOBALS.SOCKET.on('getContacts', data => {
-      console.log("data: " + data.status + " / " + data.message);
+      //console.log("data: " + data.status + " / " + data.message);
       if (data.status === "ok") {
-        console.log(data.message.toString().split(","));
+        //console.log(data.message.toString().split(","));
         GLOBALS.CONTACTS = data.message.toString().split(",");
       } else {
         // récup de l'archive ici: this.state.messages = les_messages_archivés
         ;
       }
     });
+    GLOBALS.SOCKET.on('addContacts', data => {
+        alert(data.message);
+    });
+
     this.refresh();
   }
 
@@ -69,6 +78,7 @@ class App extends Component {
 
   refresh() {
     this.getContactlist();
+    this.getPendingList();
     this.intervalID = setTimeout(this.refresh.bind(this), 1000);
     this.setState({ state: this.state });
   }
@@ -89,6 +99,18 @@ class App extends Component {
     })
   };
 
+  getPendingList() {
+    NetInfo.fetch().then(state => {
+      if (!state.isConnected) {
+        alert("No connection detected, please check your connection");
+      } else {
+        if (GLOBALS.CONTACTS[0] === "") {
+          GLOBALS.SOCKET.emit('getPendings', { email: GLOBALS.EMAIL });
+        }
+      }
+    })
+  };
+
   showPopupAddFriend() {
     this.setState({ popupAddfriend: true });
   };
@@ -98,18 +120,19 @@ class App extends Component {
   };
 
   sendFriendInvite() {
-    GLOBALS.SOCKET.on('sendInvite', data => {
-      console.log("data: " + data.status + " / " + data.message);
-      if (data.status === "ok") {
-        console.log(data.message.toString().split(","));
-        GLOBALS.CONTACTS = data.message.toString().split(",");
+    NetInfo.fetch().then(state => {
+      console.log(this.state.maFriend);
+      if (!state.isConnected) {
+        alert("No connection detected, please check your connection");
       } else {
-        // récup de l'archive ici: this.state.messages = les_messages_archivés
-        ;
+        console.log("Sending pending request to:" + this.state.maFriend);
+        if (this.state.maFriend != "") {
+          GLOBALS.SOCKET.emit('addContacts', { email: GLOBALS.EMAIL, contact: this.state.maFriend });
+          this.setState({ popupAddfriend: false });
+        }
       }
     });
-  this.setState({ popupAddfriend: false });
-};
+  };
 
 
   render() {
@@ -134,7 +157,7 @@ class App extends Component {
               />
             </View>
           </TouchableOpacity>
-          <Text style={{paddingLeft: 20,fontSize: 50}}>Contacts</Text>
+          <Text style={{ paddingLeft: 20, fontSize: 50 }}>Contacts</Text>
 
         </View>
         <View style={{ width: "100%", height: "90%", padding: 20, backgroundColor: "#4535F260", }}>
@@ -152,7 +175,7 @@ class App extends Component {
                   placeholder="Username"
                   placeholderTextColor="black"
                   style={popup.textinput}
-                  onChangeText={text => this.setState({ emailDeRecup: text })} />
+                  onChangeText={text => this.setState({ maFriend: text })} />
               </View>
               <TouchableOpacity onPress={this.sendFriendInvite} style={{ borderRadius: 5, padding: 5, marginTop: 10, alignSelf: 'center', backgroundColor: "#60B34560" }}>
                 <View>

@@ -120,20 +120,20 @@ io.on('connection', socket => {
   socket.on("login", (body) => {
     const { email, password } = body;
     console.log("Client logins");
-    User.findOne({ email: body.email }, function(err, result) {
-        if (err)
-          socket.emit( 'login', {status: "error", message: "Error while login."} );
-        if (result) {
-          console.log("ver: " + result.verified)
-          if (!result.verified)
-            socket.emit( 'login', {status: "error", message: "Account not verified."} );
-          else if (result.password === password)
-            socket.emit( 'login', {status: "ok", message: result.username} );
-          else
-            socket.emit( 'login', {status: "error", message: "Credentials do not match."} );
-        } else {
-          socket.emit( 'login', {status: "error", message: "No account with this email address."} );
-        }
+    User.findOne({ email: body.email }, function (err, result) {
+      if (err)
+        socket.emit('login', { status: "error", message: "Error while login." });
+      if (result) {
+        console.log("ver: " + result.verified)
+        if (!result.verified)
+          socket.emit('login', { status: "error", message: "Account not verified." });
+        else if (result.password === password)
+          socket.emit('login', { status: "ok", message: result.username });
+        else
+          socket.emit('login', { status: "error", message: "Credentials do not match." });
+      } else {
+        socket.emit('login', { status: "error", message: "No account with this email address." });
+      }
     })
   })
 
@@ -192,7 +192,7 @@ io.on('connection', socket => {
       if (err)
         socket.emit('message', { status: "error", message: "Error sending the message." });
       if (result) {
-        console.log(result.messages);
+        //console.log(result.messages);
         User.findOne({ email: body.email }, function (err, res) {
           if (err)
             socket.emit('messages', { status: "error", message: "Error while identifying user who asks messages." });
@@ -200,10 +200,10 @@ io.on('connection', socket => {
             username = res.username.toString();
             var message = { "date": body.date, "user": username, "message": body.message };
             const messages = result.messages;
-            console.log("messages of " + body.roomName + " : " + body.message);
+            //console.log("messages of " + body.roomName + " : " + body.message);
             messages.push(message);
-            console.log("messages of " + body.roomName + " : " + body.message);
-            BDDUpdateOneRoom({ name: body.roomName }, { messages: messages});
+            //console.log("messages of " + body.roomName + " : " + body.message);
+            BDDUpdateOneRoom({ name: body.roomName }, { messages: messages });
             socket.emit('message', { status: "ok", message: "Message sent." });
           }
           else
@@ -218,16 +218,43 @@ io.on('connection', socket => {
 
 
 
-    socket.on("addMember", (body) => {
-      console.log("Client add member in: " + body.roomName);
-      Room.findOne({ name: body.roomName }, function(err, result) {
-          if (err)
-            socket.emit('message', {status: "error", message: "Error sending the message."} );
-          if (result) {
-            console.log(body.members);
-            BDDUpdateOneRoom({name: body.roomName}, {members: body.members});
-           }})
+  socket.on("addMember", (body) => {
+    console.log("Client add member in: " + body.roomName);
+    Room.findOne({ name: body.roomName }, function (err, result) {
+      if (err)
+        socket.emit('message', { status: "error", message: "Error sending the message." });
+      if (result) {
+        //console.log(body.members);
+        BDDUpdateOneRoom({ name: body.roomName }, { members: body.members});
+      } else
+        socket.emit('message', { status: "error", message: "Error sending the message." });
     })
+  })
+
+
+
+
+
+  socket.on("addContacts", (body) => {
+    console.log("Client add member in: " + body.contact);
+    User.findOne({ username: body.contact }, function (err, result) {
+      if (err)
+        socket.emit('addContacts', { status: "error", message: "Error this user doesn't exist." });
+      if (result) {
+        User.findOne({ email: body.email }, function (err, res) {
+          if (res) {
+            username = res.username.toString();
+            if (res.pending != '')
+              BDDUpdateOneUser({ username: body.contact }, { pending: (username + "," + res.pending) });
+            else
+              BDDUpdateOneUser({ username: body.contact }, { pending: username });
+          }
+        })
+      }
+      else
+        socket.emit('addContacts', { status: "error", message: "Error this user doesn't exist." });
+    })
+  })
 
 
 
@@ -235,7 +262,7 @@ io.on('connection', socket => {
 
   socket.on("messages", (body) => {
     let username = '';
-    console.log("Client " + body.email + " asks for messages of room: " + body.roomName);
+    //console.log("Client " + body.email + " asks for messages of room: " + body.roomName);
     User.findOne({ email: body.email }, function (err, result) {
       if (err)
         socket.emit('messages', { status: "error", message: "Error while identifying user who asks messages." });
@@ -259,25 +286,25 @@ io.on('connection', socket => {
 
 
   socket.on("getOwner", (body) => {
-    console.log("Client asks for room owner");
-    Room.findOne({ name: body.roomName }, function(err, result) {
-        if (err)
-          socket.emit( 'getOwner', {status: "error", message: "Error searching for the room."} );
-        if (result) {
-          console.log(result.name);
-          console.log(result.owner);
-          socket.emit( 'getOwner', {status: "ok", message: result.owner} );
-        } else
-          socket.emit( 'getOwner', {status: "error", message: "Error searching for the room. No room found"} );
+    //console.log("Client asks for room owner");
+    Room.findOne({ name: body.roomName }, function (err, result) {
+      if (err)
+        socket.emit('getOwner', { status: "error", message: "Error searching for the room." });
+      if (result) {
+        //console.log(result.name);
+        //console.log(result.owner);
+        socket.emit('getOwner', { status: "ok", message: result.owner });
+      } else
+        socket.emit('getOwner', { status: "error", message: "Error searching for the room. No room found" });
     })
   })
 
 
 
 
-  
+
   socket.on("getContacts", (body) => {
-    console.log("Client " + body.email + " asks for his friends: " + body.friends);
+    //console.log("Client " + body.email + " asks for his friends: " + body.friends);
     User.findOne({ email: body.email }, function (err, result) {
       if (err)
         socket.emit('getContacts', { status: "error", message: "Error while identifying user who asks friends." });
@@ -291,29 +318,76 @@ io.on('connection', socket => {
 
 
 
-
-  socket.on("setOwner", (body) => {
-    console.log("Room owner changed to " + body.userName + " for room: " + body.roomName);
-    Room.findOne({ name: body.roomName }, function(err, result) {
-        if (err)
-          socket.emit( 'setOwner', {status: "error", message: "Error searching for the room."} );
-        if (result) {
-          console.log(result.name);
-          BDDUpdateOneRoom({name: body.roomName}, {owner: body.userName});
-          console.log(result.owner);
-          socket.emit( 'setOwner', {status: "ok", message: "Owner changed"} );
-        } else
-          socket.emit( 'setOwner', {status: "error", message: "Error searching for the room. No room found"} );
+  socket.on("createRoom", (body) => {
+    console.log("Client add member in: " + body.contact);
+    User.findOne({ username: body.contact }, function (err, result) {
+      if (err)
+        socket.emit('createRoom', { status: "error", message: "Error this user doesn't exist." });
+      if (result) {
+        BDDUpdateOneUser();
+      }
+      else
+        socket.emit('createRoom', { status: "error", message: "Error this user doesn't exist." });
     })
   })
 
 
 
 
-  
+
+  socket.on("getRooms", (body) => {
+    //console.log("Client " + body.email + " asks for his friends: " + body.friends);
+    User.findOne({ email: body.email }, function (err, result) {
+      if (err)
+        socket.emit('getRooms', { status: "error", message: "Error while identifying user who asks friends." });
+      if (result) {
+        //some truc
+        socket.emit('getRooms', { status: "ok", message: result.friends });
+      } else
+        socket.emit('getRooms', { status: "error", message: "No user with this email." });
+    })
+  });
+
+
+
+
+  socket.on("getPendings", (body) => {
+    //console.log("Client " + body.email + " asks for his friends: " + body.friends);
+    User.findOne({ email: body.pending }, function (err, result) {
+      if (err)
+        socket.emit('getPendings', { status: "error", message: "Error while identifying user who asks friends." });
+      if (result)
+        socket.emit('getPendings', { status: "ok", message: result.friends });
+      else
+        socket.emit('getPendings', { status: "error", message: "No user with this email." });
+    })
+  });
+
+
+
+
+  socket.on("setOwner", (body) => {
+    console.log("Room owner changed to " + body.userName + " for room: " + body.roomName);
+    Room.findOne({ name: body.roomName }, function (err, result) {
+      if (err)
+        socket.emit('setOwner', { status: "error", message: "Error searching for the room." });
+      if (result) {
+        //console.log(result.name);
+        BDDUpdateOneRoom({ name: body.roomName }, { owner: body.userName });
+        //console.log(result.owner);
+        socket.emit('setOwner', { status: "ok", message: "Owner changed" });
+      } else
+        socket.emit('setOwner', { status: "error", message: "Error searching for the room. No room found" });
+    })
+  })
+
+
+
+
+
   socket.on("getMembers", (body) => {
     let username = '';
-    console.log("Client " + body.email + " asks for members of room: " + body.roomName);
+    //console.log("Client " + body.email + " asks for members of room: " + body.roomName);
     User.findOne({ email: body.email }, function (err, result) {
       if (err)
         socket.emit('getMembers', { status: "error", message: "Error while identifying user who asks messages." });

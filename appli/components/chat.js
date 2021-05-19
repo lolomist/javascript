@@ -10,7 +10,6 @@ import {
 import { containers, blockacceuil, popup } from '../components/styles'
 import GLOBALS from "../components/globals.js";
 import NetInfo from '@react-native-community/netinfo';
-import {AsyncStorage} from "react-native";
 // import { RegisterEmmit, RegisterReceive } from './socket';
 
 class App extends Component {
@@ -18,8 +17,6 @@ class App extends Component {
     super(props);
     this.state = {
       roomName: '',
-      newMessagesDisplay: true,
-      date: 0,
       roomOwner: '',
       selectedOwner: '',
       members: [],
@@ -59,17 +56,15 @@ class App extends Component {
 
   componentDidMount() {
     this.state.roomName = this.props.navigation.getParam('room', 'room1');
-    this.getDataDate();
     GLOBALS.SOCKET.on('getOwner', data => {
       if (data.status === "ok")
           this.state.roomOwner = data.message.toString();
     });
     GLOBALS.SOCKET.on('messages', data => {
         //console.log("data: " + data.status + " / " + data.message);
-        if (data.status === "ok") {
+        if (data.status === "ok")
             this.state.messages = data.message;
-            this.storeDataDate();
-        } else {
+        else {
         // récup de l'archive ici: this.state.messages = les_messages_archivés
           ;
         }
@@ -83,29 +78,15 @@ class App extends Component {
             if (!this.state.members.includes(element) && element != "")
             this.state.contacts.push(element);
           });
+          this.state.goodOwner = this.state.members;
+          console.log(this.state.goodOwner);
+          this.state.goodOwner.splice(this.state.goodOwner.indexOf(GLOBALS.USERNAME));
+          console.log(this.state.goodOwner);
       } else {
         ;
       }
     });
     this.refresh();
-  }
-
-  storeDataDate = async () => {
-    try {
-      await AsyncStorage.setItem(this.state.roomName, (Date.now()).toString());
-    } catch (e) {
-      console.log(e);
-    }
-  }
-  getDataDate = async () => {
-    try {
-      const value = await AsyncStorage.getItem(this.state.roomName)
-      console.log("Getting: " + value);
-      if(value !== null)
-        this.state.date = parseInt(value);
-    } catch(e) {
-      // error reading value
-    }
   }
 
   handleChange(event) {
@@ -150,7 +131,7 @@ class App extends Component {
           alert("No connection detected, please check your connection");
         } else {
             if (this.state.message !== null) {
-                console.log(this.state.message + " | " + this.state.roomName)
+                //console.log(this.state.message + " | " + this.state.roomName)
                 GLOBALS.SOCKET.emit('message', { message: this.state.message, roomName: this.state.roomName , email: GLOBALS.EMAIL, date: Date.now()});
                 this.state.message = "";
             }
@@ -163,6 +144,7 @@ class App extends Component {
       if (!state.isConnected) {
         alert("No connection detected, please check your connection");
       } else {
+        //console.log(this.state.members);
         GLOBALS.SOCKET.emit('getMembers', { email: GLOBALS.EMAIL, roomName: this.state.roomName });
       }
     });
@@ -175,14 +157,14 @@ class App extends Component {
 
   removeSelectedOwner(item) {
     if (this.state.selectedOwner.includes(item)) {
-      console.log("removing " + item);
+     //console.log("removing " + item);
       this.state.selectedOwner = '';
       this.setState({ state: this.state });
     }
   }
   addSelectedOwner(item) {
     if (this.state.selectedOwner === '') {
-      console.log("adding " + item);
+      //console.log("adding " + item);
       this.state.selectedOwner = item;
       this.setState({ state: this.state });
     }
@@ -215,7 +197,7 @@ class App extends Component {
       if (!state.isConnected) {
         alert("No connection detected, please check your connection");
       } else {
-        console.log(this.state.members);
+        //console.log(this.state.members);
         GLOBALS.SOCKET.emit('getMembers', { email: GLOBALS.EMAIL, roomName: this.state.roomName });
       }
     });
@@ -230,7 +212,7 @@ class App extends Component {
       if (!state.isConnected) {
         alert("No connection detected, please check your connection");
       } else {
-        console.log(this.state.selectedOwner);
+        //console.log(this.state.selectedOwner);
         if (this.state.selectedOwner !== "") {
           GLOBALS.SOCKET.emit('setOwner', { userName: this.state.selectedOwner, roomName: this.state.roomName });
           this.hideOwnerSettingsPopup();
@@ -241,7 +223,7 @@ class App extends Component {
   };
 
   removeSelectedMember(item) {
-    console.log("removing " + item);
+    //console.log("removing " + item);
     if (this.state.selectedMember.includes(item)) {
       this.state.selectedMember.splice(this.state.selectedMember.indexOf(item), 1);
       this.setState({ state: this.state });
@@ -249,7 +231,7 @@ class App extends Component {
   }
 
   addSelectedMember(item) {
-    console.log("adding to selected list of member:" + item);
+    //console.log("adding to selected list of member:" + item);
     if (!this.state.selectedMember.includes(item)) {
       this.state.selectedMember.push(item);
       this.setState({ state: this.state });
@@ -261,12 +243,12 @@ class App extends Component {
       if (!state.isConnected) {
         alert("No connection detected, please check your connection");
       } else {
-        console.log("set member to room on server :" + this.state.selectedMember.concat(this.state.members));
+        //console.log("set member to room on server :" + this.state.selectedMember.concat(this.state.members));
         if (this.state.selectedMember[0] != "") {
           GLOBALS.SOCKET.emit('addMember', { members: this.state.selectedMember.concat(this.state.members), roomName: this.state.roomName });
           this.state.selectedMember = [];
           this.state.members = [];
-          console.log(this.state.selectedMember);
+          //console.log(this.state.selectedMember);
           this.setState({ popupMemberSettings: false });
         }
       }
@@ -350,13 +332,8 @@ class App extends Component {
                 inverted
                 contentContainerStyle={{ flexDirection: 'column-reverse' }}
                 renderItem={({item}) =>
-                  <View style={{padding:5,marginBottom: 5,backgroundColor: "#D5D8DC44", shadowColor: "#303838", shadowOffset: { width: 0, height: 5 }, shadowRadius: 10, shadowOpacity: 0.4}}>
-                    {this.state.date < (parseInt(item.date)) && (
-                      <Text style={{ fontSize: 20, color: "red" }}>New Message !</Text>
-                    )}
-                    <Text style={{ fontSize: 20, color: "black" }}>{item.user} the {new Date(parseInt(item.date)).toUTCString().substring(0,new Date(parseInt(item.date)).toUTCString().length - 4)}</Text>
-                    <Text style={{ fontSize: 20, color: "black" }}>- {item.message}</Text>
-                  </View>
+                  <View style={{padding:5,marginBottom: 5,backgroundColor: "#D5D8DC44", shadowColor: "#303838", shadowOffset: { width: 0, height: 5 }, shadowRadius: 10, shadowOpacity: 0.4}}><Text style={{ fontSize: 20, color: "black" }}>{item.user} the {new Date(parseInt(item.date)).toDateString()}</Text>
+                  <Text style={{ fontSize: 20, color: "black" }}>- {item.message}</Text></View>
                 }
             />
         </View>
@@ -400,7 +377,7 @@ class App extends Component {
                 </View>
                 <View style={{width: "100%", height: "70%", padding: 20, backgroundColor: "red", shadowColor: "#303838", shadowOffset: { width: 0, height: 5 }, shadowRadius: 10, shadowOpacity: 0.45}}>
                   <FlatList 
-                    data={this.state.members}
+                    data={this.state.goodOwner}
                     keyExtractor={item => item}
                     renderItem={({ item }) => this.renderItemOwners(item)}
                   />

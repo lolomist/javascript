@@ -44,7 +44,7 @@ class App extends Component {
 
   //Fontion pour enregistrer un compte dans la BDD
   validateInscription() {
-    console.log(this.state.condition);
+    //console.log(this.state.condition);
     if (this.state.condition == true) {
 
       // test de connection
@@ -105,12 +105,12 @@ class App extends Component {
           // RegisterEmmit(this.state.name, this.state.firstname, this.state.email, this.state.password);
           GLOBALS.SOCKET.emit('register', { username: this.state.username, email: this.state.email, password: this.state.password });
           GLOBALS.SOCKET.on('register', data => {
-            console.log("data: " + data.status + " / " + data.message);
+            //console.log("data: " + data.status + " / " + data.message);
             if (data.status === "ok") {
                 alert("Registration succesful !")
                 this.moveConnection();
             } else {
-              console.log(data.message)
+              //console.log(data.message)
               if (data.message === "Email already in use.") {
                 this.state.emailError = true;
                 this.state.emailErrorMessage = "There is already an account with this email";

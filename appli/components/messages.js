@@ -19,7 +19,7 @@ class App extends Component {
       popupCreateRoom: false,
       popupContactList: false,
       selectContacts: [],
-      rooms: [],
+      rooms: ["room1", "pastoucher"],
       roomName: ""
     }
     this.getRoomlist = this.getRoomlist.bind(this);
@@ -43,9 +43,6 @@ class App extends Component {
       console.log("data: " + data.status + " / " + data.message);
       if (data.status === "ok") {
         this.state.rooms = data.message.toString().split(",");
-      } else {
-        // is not ok
-        ;
       }
     });
     this.refresh();
@@ -101,7 +98,7 @@ class App extends Component {
       } else {
         console.log("set member to room on server :" + this.state.selectContacts);
         if (this.state.selectContacts[0] != "") {
-          //GLOBALS.SOCKET.emit('createRoom', { members: this.state.selectContacts, roomName: this.state.roomName });
+          //GLOBALS.SOCKET.emit('createRoom', { email: GLOBALS.EMAIL , roomName: this.state.roomName });
           this.state.selectContacts = [];
           this.setState({ popupContactList: false });
         }
@@ -115,14 +112,14 @@ class App extends Component {
 
     if (this.state.selectContacts.includes(item)) {
       return (
-        <TouchableOpacity onPress={() => this.removeSelectedContactList(item)} style={{width: "100%", height: 50, padding: 5, flexDirection: "row", justifyContent:"flex-start", alignItems: "center", marginTop:30, borderRadius: 30, backgroundColor}}>
-          <Text style={{flex: 1, textAlign: "center", fontSize: 20, color}}>{item}</Text>
+        <TouchableOpacity onPress={() => this.removeSelectedContactList(item)} style={{ width: "100%", height: 50, padding: 5, flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginTop: 30, borderRadius: 30, backgroundColor }}>
+          <Text style={{ flex: 1, textAlign: "center", fontSize: 20, color }}>{item}</Text>
         </TouchableOpacity>
       );
     } else {
       return (
-        <TouchableOpacity onPress={() => this.addSelectedContactList(item)} style={{width: "100%", height: 50, padding: 5, flexDirection: "row", justifyContent:"flex-start", alignItems: "center", marginTop:30, borderRadius: 30, backgroundColor}}>
-          <Text style={{flex: 1, textAlign: "center", fontSize: 20, color}}>{item}</Text>
+        <TouchableOpacity onPress={() => this.addSelectedContactList(item)} style={{ width: "100%", height: 50, padding: 5, flexDirection: "row", justifyContent: "flex-start", alignItems: "center", marginTop: 30, borderRadius: 30, backgroundColor }}>
+          <Text style={{ flex: 1, textAlign: "center", fontSize: 20, color }}>{item}</Text>
         </TouchableOpacity>
       );
     }
@@ -150,86 +147,90 @@ class App extends Component {
 
       <View style={containers.container}>
         <View style={{ flex: 1, flexDirection: "row", width: "100%", padding: 5 }}>
-          <TouchableOpacity onPress={this.moveToContacts} style={{width: 60 }}>
+          <TouchableOpacity onPress={this.moveToContacts} style={{ width: 60 }}>
             <View style={{ borderRadius: 5, width: "100%", height: "100%", alignItems: "center", backgroundColor: "#CDCDCD" }}>
               <Image
-                style={{height: "90%", width: "90%", alignSelf: "center" }}
+                style={{ height: "90%", width: "90%", alignSelf: "center" }}
                 source={require('../assets/icon-contacts.png')}
               />
             </View>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={ () => this.moveToRoom("room1")} style={{width: 60 }}>
+          <TouchableOpacity onPress={() => this.moveToRoom("room1")} style={{ width: 60 }}>
             <View style={{ borderRadius: 5, width: "100%", height: "100%", alignItems: "center", backgroundColor: "#8D8D8D" }}>
               <Image
-                style={{height: "90%", width: "90%", alignSelf: "center" }}
+                style={{ height: "90%", width: "90%", alignSelf: "center" }}
                 source={require('../assets/logo.png')}
               />
             </View>
           </TouchableOpacity>
-          <Text style={{paddingLeft: 20,fontSize: 50}}>Room</Text>
+          <Text style={{ paddingLeft: 20, fontSize: 50 }}>Room</Text>
         </View>
-        <View style={{ width: "100%", height: "90%", padding: 20, backgroundColor: "#4535F260",}}>
+        <View style={{ width: "100%", height: "90%", padding: 20, backgroundColor: "#4535F260", }}>
           {this.state.popupCreateRoom && (
-                <View style={{position: 'absolute', left: 10, right: 10, top: 10, backgroundColor: "white", zIndex: 90, padding: 10,}}>
-                  <Text style={{ fontSize: 25 }}>create a room</Text>
-                  <TouchableOpacity onPress={this.hidePopupCreateRoom} style={{position: 'absolute', right: 10}}>
-                    <View style={blockacceuil.logoConnection}>
-                      <Text style={blockacceuil.textLogoConnection3}>x</Text>
-                    </View>
-                  </TouchableOpacity>
-                  <View style={{ width: "100%",}}>
-                    <TextInput
-                      placeholder="nom de la room"
-                      placeholderTextColor="black"
-                      style={popup.textinput}
-                      onChangeText={text => this.setState({ roomName: text })} />
-                  </View>
-                  <TouchableOpacity onPress={() => {this.state.roomName != "" ? this.showPopupContactList() : null}} style={{borderRadius: 5, padding: 5, marginTop: 10, alignSelf: 'center', backgroundColor: "#60B34560"}}>
-                    <View>
-                      <Text>Choose contacts to invite</Text>
-                    </View>
-                  </TouchableOpacity>
+            <View style={{ position: 'absolute', left: 10, right: 10, top: 10, backgroundColor: "white", zIndex: 90, padding: 10, }}>
+              <Text style={{ fontSize: 25 }}>create a room</Text>
+              <TouchableOpacity onPress={this.hidePopupCreateRoom} style={{ position: 'absolute', right: 10 }}>
+                <View style={blockacceuil.logoConnection}>
+                  <Text style={blockacceuil.textLogoConnection3}>x</Text>
                 </View>
+              </TouchableOpacity>
+              <View style={{ width: "100%", }}>
+                <TextInput
+                  placeholder="nom de la room"
+                  placeholderTextColor="black"
+                  style={popup.textinput}
+                  onChangeText={text => this.setState({ roomName: text })} />
+              </View>
+              <TouchableOpacity onPress={() => { this.state.roomName != "" ? this.showPopupContactList() : null }} style={{ borderRadius: 5, padding: 5, marginTop: 10, alignSelf: 'center', backgroundColor: "#60B34560" }}>
+                <View>
+                  <Text>Choose contacts to invite</Text>
+                </View>
+              </TouchableOpacity>
+            </View>
           )}
           {this.state.popupContactList && (
-          <View style={popup.popup}>
-            <View style={popup.popup2}>
-              <View style={containers.container}>
-                <View style={{width:"100%",alignItems:"center", backgroundColor: "black"}}>
-                  <TouchableOpacity onPress={this.hidePopupContactList} style={blockacceuil.blockRecup2}>
-                    <View style={blockacceuil.logoConnection}>
-                      <Text style={blockacceuil.textLogoConnection3}>x</Text>
-                    </View>
-                  </TouchableOpacity>
-                </View>
-                <View style={{width: "100%", height: "70%", padding: 20, backgroundColor: "red", shadowColor: "#303838", shadowOffset: { width: 0, height: 5 }, shadowRadius: 10, shadowOpacity: 0.45}}>
-                <FlatList 
-                    data={GLOBALS.CONTACTS}
-                    keyExtractor={item => item}
-                    renderItem={({ item }) => this.renderItemContactList(item)}
-                  />
-                </View>
-                <View>
-                  <TouchableOpacity onPress={this.addContacts} style={{width: "100%", height: 50, padding: 5, flexDirection: "row", justifyContent:"flex-end", alignItems: "center", marginTop:30, backgroundColor: "grey", borderRadius: 30}}>
-                    <Text style={{ flex: 1, textAlign: "center", fontSize: 20, color: "black" }}>Create</Text>
-                  </TouchableOpacity>
+            <View style={popup.popup}>
+              <View style={popup.popup2}>
+                <View style={containers.container}>
+                  <View style={{ width: "100%", alignItems: "center", backgroundColor: "black" }}>
+                    <TouchableOpacity onPress={this.hidePopupContactList} style={blockacceuil.blockRecup2}>
+                      <View style={blockacceuil.logoConnection}>
+                        <Text style={blockacceuil.textLogoConnection3}>x</Text>
+                      </View>
+                    </TouchableOpacity>
+                  </View>
+                  <View style={{ width: "100%", height: "70%", padding: 20, backgroundColor: "red", shadowColor: "#303838", shadowOffset: { width: 0, height: 5 }, shadowRadius: 10, shadowOpacity: 0.45 }}>
+                    <FlatList
+                      data={GLOBALS.CONTACTS}
+                      keyExtractor={(item, index) => index.toString()}
+                      renderItem={({ item }) => this.renderItemContactList(item)}
+                    />
+                  </View>
+                  <View>
+                    <TouchableOpacity onPress={this.addContacts} style={{ width: "100%", height: 50, padding: 5, flexDirection: "row", justifyContent: "flex-end", alignItems: "center", marginTop: 30, backgroundColor: "grey", borderRadius: 30 }}>
+                      <Text style={{ flex: 1, textAlign: "center", fontSize: 20, color: "black" }}>Create</Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
               </View>
             </View>
-          </View>
-        )}
+          )}
           <FlatList
             data={this.state.rooms}
-            keyExtractor={item => item}
+            keyExtractor={(item, index) => index.toString()}
             renderItem={({ item }) =>
-              <Text style={{ flex: 1, textAlign: "center", fontSize: 20, color: "black" }}>{item}</Text>
+              <TouchableOpacity onPress={() => this.moveToRoom(item)} style={{borderRadius: 10, backgroundColor: "#6555F260",margin: 5, padding: 5,}}>
+                <View>
+                  <Text style={{ flex: 1, textAlign: "center", fontSize: 25, color: "black" }}>{item}</Text>
+                </View>
+              </TouchableOpacity>
             }
           />
-          <TouchableOpacity onPress={this.showPopupCreateRoom} style={{position: 'absolute', right: 20, bottom: 20, width: 60,}}>
+          <TouchableOpacity onPress={this.showPopupCreateRoom} style={{ position: 'absolute', right: 20, bottom: 20, width: 60, }}>
             <View>
               <Image
-                style={{width: 60,height: 60,}}
+                style={{ width: 60, height: 60, }}
                 source={require('../assets/icon-add-contact.png')}
               />
             </View>
