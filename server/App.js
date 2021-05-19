@@ -311,7 +311,21 @@ io.on('connection', socket => {
         socket.emit('getContacts', { status: "error", message: "No user with this email." });
     })
   });
-
+  
+  
+  
+  
+  socket.on("getPendings", (body) => {
+    //console.log("Client " + body.email + " asks for his friends: " + body.friends);
+    User.findOne({ email: body.pending }, function (err, result) {
+      if (err)
+        socket.emit('getPendings', { status: "error", message: "Error while identifying user who asks friends." });
+      if (result)
+        socket.emit('getPendings', { status: "ok", message: result.friends });
+      else
+        socket.emit('getPendings', { status: "error", message: "No user with this email." });
+    })
+  });
 
 
 
