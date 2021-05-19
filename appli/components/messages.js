@@ -35,7 +35,7 @@ class App extends Component {
   }
 
   componentWillUnmount() {
-    clearInterval(this.intervalID);
+    
   }
 
   componentDidMount() {
@@ -98,9 +98,10 @@ class App extends Component {
       } else {
         console.log("set member to room on server :" + this.state.selectContacts);
         if (this.state.selectContacts[0] != "") {
-          //GLOBALS.SOCKET.emit('createRoom', { email: GLOBALS.EMAIL , roomName: this.state.roomName });
+          GLOBALS.SOCKET.emit('createRoom', { email: GLOBALS.EMAIL , roomName: this.state.roomName, members: this.state.selectContacts});
           this.state.selectContacts = [];
           this.setState({ popupContactList: false });
+          GLOBALS.SOCKET.emit('getRooms', { email: GLOBALS.EMAIL });
         }
       }
     });

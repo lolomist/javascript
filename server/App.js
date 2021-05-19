@@ -225,7 +225,15 @@ io.on('connection', socket => {
         socket.emit('message', { status: "error", message: "Error sending the message." });
       if (result) {
         //console.log(body.members);
-        BDDUpdateOneRoom({ name: body.roomName }, { members: body.members});
+        BDDUpdateOneRoom({ name: body.roomName }, { members: body.members });
+        body.members.forEach(element => {
+          User.findOne({ username: element }, function (err, res) {
+            if (res) {
+              res.rooms.push({ roomName: body.roomName, archived: { status: false } });
+              BDDUpdateOneUser({ username: element }, { rooms: res.rooms });
+            }
+          })
+        });
       } else
         socket.emit('message', { status: "error", message: "Error sending the message." });
     })
@@ -319,14 +327,34 @@ io.on('connection', socket => {
 
 
   socket.on("createRoom", (body) => {
-    console.log("Client add member in: " + body.contact);
-    User.findOne({ username: body.contact }, function (err, result) {
+    User.findOne({ email: body.email }, function (err, result) {
       if (err)
-        socket.emit('createRoom', { status: "error", message: "Error this user doesn't exist." });
+        socket.emit('createRoom', { status: "error", message: "Error when attemps to create a new room." });
       if (result) {
-        BDDUpdateOneUser();
-      }
-      else
+        Room.findOne({ name: body.roomName }, function (err, redwart) {
+          if (!err && !redwart) {
+            result.rooms.push({ roomName: body.roomName, archived: { status: false } })
+            body.members.push(result.username)
+            body.members.forEach(element => {
+              User.findOne({ username: element }, function (err, res) {
+                if (res) {
+                  res.rooms.push({ roomName: body.roomName, archived: { status: false } });
+                  BDDUpdateOneUser({ username: element }, { rooms: res.rooms });
+                }
+              })
+            });
+            const newRoom = new Room({
+              name: body.roomName,
+              members: body.members,
+              owner: result.username,
+              message: []
+            })
+            newRoom.save()
+            //create room on room
+          } else
+            console.log("already exist");
+        });
+      } else
         socket.emit('createRoom', { status: "error", message: "Error this user doesn't exist." });
     })
   })
@@ -336,7 +364,6 @@ io.on('connection', socket => {
 
 
   socket.on("getRooms", (body) => {
-    //console.log("Client " + body.email + " asks for his friends: " + body.friends);
     User.findOne({ email: body.email }, function (err, result) {
       if (err)
         socket.emit('getRooms', { status: "error", message: "Error while identifying user who asks friends." });
@@ -414,7 +441,7 @@ io.on('connection', socket => {
 
 
 
-  
+
   socket.on("iQuit", (body) => {
     console.log("Client " + body.email + " asks to leave the room room: " + body.roomName + ", goodbye :c");
     User.findOne({ email: body.email }, function (err, result) {
@@ -436,8 +463,8 @@ io.on('connection', socket => {
       if (result) {
         let newMembers = result.members;
         newMembers.splice(newMembers.indexOf(body.username), 1)
-        BDDUpdateOneRoom({name: body.roomName}, {members: newMembers});
-        BDDUpdateOneRoom({name: body.roomName}, {owner: newMembers[0]});
+        BDDUpdateOneRoom({ name: body.roomName }, { members: newMembers });
+        BDDUpdateOneRoom({ name: body.roomName }, { owner: newMembers[0] });
         socket.emit('iQuit', { status: "ok", message: "Bye Bye" });
       } else
         socket.emit('iQuit', { status: "error", message: "No Room to get messages from." });
@@ -457,8 +484,8 @@ io.on('connection', socket => {
       if (result) {
         let newMembers = result.members;
         newMembers.splice(newMembers.indexOf(body.username), 1)
-        BDDUpdateOneRoom({name: body.roomName}, {members: newMembers});
-        BDDUpdateOneRoom({name: body.roomName}, {owner: newMembers[0]});
+        BDDUpdateOneRoom({ name: body.roomName }, { members: newMembers });
+        BDDUpdateOneRoom({ name: body.roomName }, { owner: newMembers[0] });
         messages = result.messages;
       } else
         socket.emit('archive', { status: "error", message: "No Room to get messages from." });
