@@ -22,10 +22,12 @@ class App extends Component {
       condition: true,
       emailError: false,
       maFriend: '',
-      emailErrorMessage: ''
+      emailErrorMessage: '',
+      pendingList: []
     }
     this.alertPresent = false;
     this.getContactlist = this.getContactlist.bind(this);
+    this.getPendingList = this.getPendingList.bind(this);
     this.moveToRecover = this.moveToRecover.bind(this);
     this.moveToMessages = this.moveToMessages.bind(this);
     this.moveToContacts = this.moveToContacts.bind(this);
@@ -78,6 +80,7 @@ class App extends Component {
 
   refresh() {
     this.getContactlist();
+    this.getPendingList();
     this.intervalID = setTimeout(this.refresh.bind(this), 1000);
     this.setState({ state: this.state });
   }
@@ -93,6 +96,18 @@ class App extends Component {
       } else {
         if (GLOBALS.CONTACTS[0] === "") {
           GLOBALS.SOCKET.emit('getContacts', { email: GLOBALS.EMAIL });
+        }
+      }
+    })
+  };
+
+  getPendingList() {
+    NetInfo.fetch().then(state => {
+      if (!state.isConnected) {
+        alert("No connection detected, please check your connection");
+      } else {
+        if (GLOBALS.CONTACTS[0] === "") {
+          GLOBALS.SOCKET.emit('getPendings', { email: GLOBALS.EMAIL });
         }
       }
     })
