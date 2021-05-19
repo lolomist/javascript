@@ -7,7 +7,7 @@ export default {
   EMAIL: "",
   PASS: "",
   USERNAME: "",
-  CONTACTS: [""],
+  CONTACTS: [],
   DEVICEID: "",
   CONNECTED: false,
   ONSOCKET: {

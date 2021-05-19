@@ -40,7 +40,7 @@ class App extends Component {
 
   componentDidMount() {
     GLOBALS.SOCKET.on('getRooms', data => {
-      console.log("data: " + data.status + " / " + data.message);
+      //console.log("data: " + data.status + " / " + data.message);
       if (data.status === "ok") {
         this.state.rooms = data.message.toString().split(",");
       }
@@ -96,13 +96,12 @@ class App extends Component {
       if (!state.isConnected) {
         alert("No connection detected, please check your connection");
       } else {
-        console.log("set member to room on server :" + this.state.selectContacts);
+        //console.log("set member to room on server :" + this.state.selectContacts);
         if (this.state.selectContacts[0] != "") {
           GLOBALS.SOCKET.emit('createRoom', { email: GLOBALS.EMAIL , roomName: this.state.roomName, members: this.state.selectContacts});
           this.state.selectContacts = [];
           this.setState({ popupContactList: false });
           GLOBALS.SOCKET.emit('getRooms', { email: GLOBALS.EMAIL });
-          this.hidePopupCreateRoom();
         }
       }
     });
