@@ -34,6 +34,10 @@ class App extends Component {
     this.addContacts = this.addContacts.bind(this);
   }
 
+  componentWillUnmount() {
+    clearInterval(this.intervalID);
+  }
+
   componentDidMount() {
     GLOBALS.SOCKET.on('getRooms', data => {
       console.log("data: " + data.status + " / " + data.message);
