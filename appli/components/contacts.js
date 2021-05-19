@@ -167,7 +167,7 @@ class App extends Component {
             data={GLOBALS.CONTACTS}
             keyExtractor={item => item}
             renderItem={({ item }) =>
-              <Text style={{ flex: 1, textAlign: "center", fontSize: 20, color: "black" }}>{item}</Text>
+              <Text style={{ flex: 1, textAlign: "center", fontSize: 30, color: "black" }}>{item}</Text>
             }
           />
 
