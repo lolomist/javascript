@@ -370,10 +370,10 @@ io.on('connection', socket => {
       if (result) {
         let rooms = [];
         for (const [key, value] of Object.entries(result.rooms)) {
-          console.log(result.rooms[key]["roomName"]);
+          //console.log(result.rooms[key]["roomName"]);
           rooms.push(result.rooms[key]["roomName"]);
         }
-        console.log(rooms);
+        //console.log(rooms);
         socket.emit('getRooms', { status: "ok", message: rooms });
       } else
         socket.emit('getRooms', { status: "error", message: "No user with this email." });
