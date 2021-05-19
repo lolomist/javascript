@@ -40,7 +40,7 @@ class App extends Component {
 
   componentDidMount() {
     GLOBALS.SOCKET.on('getRooms', data => {
-      console.log("data: " + data.status + " / " + data.message);
+      console.log("rooms: " + data.status + " / " + data.message);
       if (data.status === "ok") {
         this.state.rooms = data.message.toString().split(",");
       } else {
@@ -56,10 +56,12 @@ class App extends Component {
   }
 
   moveToContacts() {
+    clearInterval(this.intervalID);
     this.props.navigation.navigate("Contact");
   };
 
   moveToRoom(selectedRoom) {
+    clearInterval(this.intervalID);
     this.props.navigation.navigate("Chat", { room: selectedRoom });
   };
 
