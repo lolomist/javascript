@@ -102,6 +102,7 @@ class App extends Component {
           this.state.selectContacts = [];
           this.setState({ popupContactList: false });
           GLOBALS.SOCKET.emit('getRooms', { email: GLOBALS.EMAIL });
+          this.hidePopupCreateRoom();
         }
       }
     });
